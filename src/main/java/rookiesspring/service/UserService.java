@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rookiesspring.dto.UserDTO;
 import rookiesspring.dto.response.UserResponseDTO;
+import rookiesspring.exception.ResourceNotFoundException;
 import rookiesspring.model.User;
 import rookiesspring.repository.UserRepository;
 import rookiesspring.service.interfaces.UserServiceInterface;
@@ -35,7 +36,7 @@ public class UserService implements UserServiceInterface {
     }
 
     public UserResponseDTO findById(Long userId) {
-        return ToResponseDTO(repository.findById(userId).orElseThrow());
+        return ToResponseDTO(repository.findById(userId).orElseThrow(() -> new ResourceNotFoundException()));
     }
 
     public UserResponseDTO save(UserDTO newUser) {
