@@ -2,10 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package rookiesspring.model;
+package rookiesspring.model.composite_model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,17 +17,21 @@ import lombok.Setter;
  * @author Tamina
  */
 @Embeddable
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class Address {
+@EqualsAndHashCode
+public class Order_Detail_Key {
 
-    private String address_number;
-    private String street;
-    private String ward;
-    private String district;
-    private String city;
-    private String province;
-    private String country;
+    @Column
+    private long order_id;
+
+    @Column
+    private long product_id;
+
+    public Order_Detail_Key(long order_id, long product_id) {
+        this.order_id = order_id;
+        this.product_id = product_id;
+    }
+
 }

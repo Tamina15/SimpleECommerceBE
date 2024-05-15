@@ -4,13 +4,20 @@
  */
 package rookiesspring.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,25 +34,29 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "`user`")
-public class User {
+public class User extends AuditEntity<Long>{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    private String username;
-    private String firstname;
-    private String lastname;
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long id;
     @Column(unique = true)
     private String email;
-    private boolean gender;
-    private int age;
-    private String phone;
+    private String username;
     private String password;
     private String refreshToken;
     private boolean isBlock = false;
-    
-    
-    @Embedded
-    private Address address;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @JsonManagedReference()
+    private List<Order> orders;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    UserDetail user_detail;
+
+    @Override
+    public String toString() {
+        return "User{" + "id=" + getId() + ", email=" + email + ", password=" + password + ", refreshToken=" + refreshToken + ", isBlock=" + isBlock + ", orders=" + orders.size() + ", user_detail=" + user_detail + '}';
+    }
+
 }

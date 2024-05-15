@@ -11,8 +11,13 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,32 +33,34 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @Setter
 @ToString
-public class Product {
+public class Product extends AuditEntity<Long>{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private long id;
 
     private String name;
     private String description;
     private double price;
 
+   @ColumnDefault(value = "false")
+    private boolean feature;
     @ColumnDefault(value = "0")
     private int amount;
 
     @ColumnDefault(value = "0")
     private double rating;
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "product_category",
+            joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
+    @JsonManagedReference()
+    private Set<Category> category;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL)
     @JsonManagedReference
     List<Image> images;
-
-//    @OneToMany(mappedBy = "product")
-//    @JsonManagedReference
-//    private List<Product_ImportBill> import_bill = new ArrayList<>();
-    public Product(long id) {
-        this.id = id;
-    }
 
     public boolean checkAmount() {
         return amount > 0;
@@ -63,10 +70,14 @@ public class Product {
         return amount >= a;
     }
 
+    public boolean addCategory(Category c) {
+        return category.add(c);
+    }
+
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 37 * hash + (int) (this.id ^ (this.id >>> 32));
+        int hash = 5;
+        hash = 53 * hash + Objects.hashCode(getId());
         return hash;
     }
 
@@ -81,8 +92,8 @@ public class Product {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Product other = (Product) obj;
-        return this.id == other.id;
+        final Category other = (Category) obj;
+        return Objects.equals(getId(), other.getId());
     }
 
 }

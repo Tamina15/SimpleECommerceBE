@@ -4,11 +4,13 @@
  */
 package rookiesspring.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,21 +25,37 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Category {
+public class Category extends AuditEntity<Long> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long id;
 
     private String name;
     private String description;
 
+    @ManyToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @JsonBackReference
+    private Set<Product> products;
 
+    public void addProduct(Product p) {
+        if (products != null) {
+            products.add(p);
+        } else {
+            products = new HashSet<>();
+            products.add(p);
+        }
+    }
+
+   @Override
+    public String toString() {
+        return "Category{" + "id=" + getId() + ", name=" + name + ", description=" + description + ", products=" + products.size() + '}';
+    }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 17 * hash + Objects.hashCode(this.id);
+        int hash = 5;
+        hash = 53 * hash + Objects.hashCode(getId());
         return hash;
     }
 
@@ -53,7 +71,7 @@ public class Category {
             return false;
         }
         final Category other = (Category) obj;
-        return Objects.equals(this.id, other.id);
+        return Objects.equals(getId(), other.getId());
     }
 
 }

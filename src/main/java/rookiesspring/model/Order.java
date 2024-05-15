@@ -8,17 +8,17 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import rookiesspring.model.composite_model.Order_Detail;
 
 /**
  *
@@ -30,11 +30,11 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Order {
+public class Order extends AuditEntity<Long>{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private long id;
 
     @ManyToOne(cascade = CascadeType.ALL)  // field name inside db
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
@@ -46,9 +46,7 @@ public class Order {
     @Column(updatable = false)
     private LocalDateTime createdTime = LocalDateTime.now();
 
-
-    
-    
-    
+    @OneToMany(mappedBy = "order")
+    private List<Order_Detail> details;
     
 }
