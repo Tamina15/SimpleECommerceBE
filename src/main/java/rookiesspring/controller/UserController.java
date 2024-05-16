@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.UserDTO;
 import rookiesspring.dto.response.UserResponseDTO;
+import rookiesspring.dto.response.custom.UserResponseDTOShort;
 import rookiesspring.model.User;
 import rookiesspring.service.UserService;
 
@@ -32,21 +33,37 @@ import rookiesspring.service.UserService;
 
 public class UserController {
 
-    UserService service;
+    private UserService service;
 
     public UserController(UserService service) {
         this.service = service;
     }
 
-    @GetMapping("/")
-    public List<UserResponseDTO> getAllUsersFull() {
+    @GetMapping({"", "/", "/all"})
+    public List<UserResponseDTOShort> getAllUsers() {
         return service.findAll();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/full")
+    public List<UserResponseDTO> getAllUsersFull() {
+        return service.findAllFull();
+    }
+
+    @GetMapping("/search")
+    public List<UserResponseDTOShort> getAllUserByName(@RequestParam("username") String username) {
+        return service.findAllByUsername(username);
+    }
+
+    @GetMapping("/full/{id}")
     public UserResponseDTO getUserFull(@PathVariable(value = "id") Long userId) {
+        return service.findByIdFull(userId);
+    }
+
+    @GetMapping("/{id}")
+    public UserResponseDTOShort getUser(@PathVariable(value = "id") Long userId) {
         return service.findById(userId);
     }
+
     @PostMapping("/new")
     public UserResponseDTO createUser(@RequestBody UserDTO newUser) {
         return service.save(newUser);
