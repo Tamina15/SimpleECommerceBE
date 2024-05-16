@@ -4,13 +4,14 @@
  */
 package rookiesspring.service;
 
-import java.util.ArrayList;
+import jakarta.persistence.EntityExistsException;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rookiesspring.dto.UserDTO;
 import rookiesspring.dto.response.UserResponseDTO;
+import rookiesspring.dto.response.custom.UserResponseDTOShort;
 import rookiesspring.exception.ResourceNotFoundException;
+import rookiesspring.mapper.UserMapper;
 import rookiesspring.model.User;
 import rookiesspring.repository.UserRepository;
 import rookiesspring.service.interfaces.UserServiceInterface;
@@ -23,52 +24,53 @@ import rookiesspring.service.interfaces.UserServiceInterface;
 @Service
 public class UserService implements UserServiceInterface {
 
-    @Autowired
-    UserRepository repository;
+    private UserRepository repository;
+    private UserMapper mapper;
 
-    public List<UserResponseDTO> findAll() {
-        List<User> list = repository.findAll();
-        List<UserResponseDTO> d = new ArrayList<>();
-        for (User u : list) {
-            d.add(ToResponseDTO(u));
-        }
-        return d;
+    public UserService(UserRepository repository, UserMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
     }
 
-    public UserResponseDTO findById(Long userId) {
-        return ToResponseDTO(repository.findById(userId).orElseThrow(() -> new ResourceNotFoundException()));
+    public List<UserResponseDTOShort> findAll() {
+        return repository.findAllProjectedBy();
+    }
+
+    public UserResponseDTOShort findById(Long userId) {
+        return repository.findProjectedById(userId).orElseThrow(() -> new ResourceNotFoundException());
+    }
+
+    public List<UserResponseDTOShort> findAllByUsername(String username) {
+        return repository.findAllProjectedByUsernameContainsIgnoreCase(username);
+    }
+
+    public List<UserResponseDTO> findAllFull() {
+        return mapper.ToResponseDTOList(repository.findAll());
+    }
+
+    public UserResponseDTO findByIdFull(Long userId) {
+        return mapper.ToResponseDTO(repository.findById(userId).orElseThrow(() -> new ResourceNotFoundException()));
     }
 
     public UserResponseDTO save(UserDTO newUser) {
-        User u = toEntity(newUser);
-        u= repository.save(u);
-        return ToResponseDTO(u);
-    }
-
-    public boolean checkExist(Long id) {
-        return repository.findById(id).isPresent();
+        User u = mapper.toEntity(newUser);
+        try {
+            return mapper.ToResponseDTO(repository.save(u));
+        } catch (Exception e) {
+            throw new EntityExistsException();
+        }
     }
 
     public UserResponseDTO updateOne(User oldUser) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return mapper.ToResponseDTO(repository.save(oldUser));
     }
 
     public void deleteById(long id) {
         repository.deleteById(id);
     }
 
-    public UserResponseDTO ToResponseDTO(User e) {
-        UserResponseDTO u = new UserResponseDTO(e.getId(), e.getUsername(), e.getEmail(), e.isGender(), e.getAge(), e.getPhone(), e.getAddress());
-        return u;
-    }
-
-    public User toEntity(UserDTO dto) {
-        User u = new User();
-        u.setUsername(dto.username());
-        u.setEmail(dto.email());
-        u.setGender(dto.gender());
-        u.setAge(dto.age());
-        u.setPhone(dto.phone());
-        return u;
+    @Override
+    public boolean checkExist(long id) {
+        return repository.existsById(id);
     }
 }
