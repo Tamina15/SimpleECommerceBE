@@ -4,8 +4,13 @@
  */
 package rookiesspring.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.util.Objects;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -17,15 +22,20 @@ import lombok.Setter;
 @Entity
 @NoArgsConstructor
 @Setter
+@Getter
 public class Rate extends AuditEntity<Long>{
 
+    @ManyToOne(cascade = CascadeType.ALL)  // field name inside db
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JsonBackReference
+    private User user;
+    
+    @ManyToOne(cascade = CascadeType.ALL)  // field name inside db
+    @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false)
+    @JsonBackReference
+    private Product product;
 
-//
-//    private User user;
-//
-//    private Product product;
-
-    private int rating;
+    private int score;
 
     @Override
     public int hashCode() {

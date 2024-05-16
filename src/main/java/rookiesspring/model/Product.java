@@ -48,8 +48,8 @@ public class Product extends AuditEntity<Long>{
     @ColumnDefault(value = "0")
     private int amount;
 
-    @ColumnDefault(value = "0")
-    private double rating;
+    @ColumnDefault(value = "'none'")
+    private String rating;
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "product_category",
@@ -60,7 +60,7 @@ public class Product extends AuditEntity<Long>{
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL)
     @JsonManagedReference
-    List<Image> images;
+    Set<Image> images;
 
     public boolean checkAmount() {
         return amount > 0;
