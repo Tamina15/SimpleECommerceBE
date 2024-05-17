@@ -14,7 +14,6 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  *
@@ -24,12 +23,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 public class Category extends AuditEntity<Long> {
-
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
 
     private String name;
     private String description;
@@ -47,7 +41,7 @@ public class Category extends AuditEntity<Long> {
         }
     }
 
-   @Override
+    @Override
     public String toString() {
         return "Category{" + "id=" + getId() + ", name=" + name + ", description=" + description + ", products=" + products.size() + '}';
     }

@@ -10,8 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
-import java.time.LocalDateTime;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,51 +21,25 @@ import lombok.Setter;
  */
 @Entity
 @Setter
+@Getter
 @NoArgsConstructor
-public class UserDetail extends AuditEntity<Long> {
-    
+public class UserDetail {
+
     @Id
     private long id;
-    
+
     private String firstname;
     private String lastname;
     private boolean gender;
     private int age;
     private String phone;
+
     @Embedded
     private Address address;
-    
+
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
 
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public String getLastname() {
-        return lastname;
-    }
-
-    public boolean isGender() {
-        return gender;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public Address getAddress() {
-        return address;
-    }
-
-    public User getUser() {
-        return user;
-    }
-    
 }

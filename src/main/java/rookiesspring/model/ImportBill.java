@@ -64,7 +64,7 @@ public class ImportBill extends AuditEntity<Long>{
 //    @JsonManagedReference
     private Supplier supplier;
 
-    @OneToMany(mappedBy = "importbill", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "importbill")
     @JsonManagedReference
     private List<Product_ImportBill> products = new ArrayList<>();
 

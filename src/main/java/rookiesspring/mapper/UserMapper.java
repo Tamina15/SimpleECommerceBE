@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
 package rookiesspring.mapper;
 
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import rookiesspring.model.UserDetail;
  */
 @Service
 public class UserMapper implements BaseMapper<User, UserDTO, UserResponseDTO> {
+
     @Override
     public User toEntity(UserDTO dto) {
         User u = new User();

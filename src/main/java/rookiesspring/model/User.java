@@ -30,21 +30,23 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "`user`")
-public class User extends AuditEntity<Long>{
+public class User extends AuditEntity<Long> {
 
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
     @Column(unique = true)
     private String email;
+
     private String username;
     private String password;
     private String refreshToken;
     private boolean isBlock = false;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonManagedReference()
     private List<Order> orders;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonManagedReference()
+    private List<Rate> rates;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn

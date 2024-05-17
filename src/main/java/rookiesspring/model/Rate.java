@@ -23,13 +23,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-public class Rate extends AuditEntity<Long>{
+public class Rate extends AuditEntity<Long> {
 
     @ManyToOne(cascade = CascadeType.ALL)  // field name inside db
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference
     private User user;
-    
+
     @ManyToOne(cascade = CascadeType.ALL)  // field name inside db
     @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference
@@ -58,6 +58,5 @@ public class Rate extends AuditEntity<Long>{
         final Rate other = (Rate) obj;
         return Objects.equals(this.getId(), other.getId());
     }
-    
-    
+
 }
