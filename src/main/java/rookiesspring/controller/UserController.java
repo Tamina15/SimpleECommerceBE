@@ -4,9 +4,9 @@
  */
 package rookiesspring.controller;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.UserDTO;
-import rookiesspring.dto.response.UserResponseDTO;
-import rookiesspring.dto.response.custom.UserResponseDTOShort;
 import rookiesspring.model.User;
 import rookiesspring.service.UserService;
 
@@ -40,51 +38,52 @@ public class UserController {
     }
 
     @GetMapping({"", "/", "/all"})
-    public List<UserResponseDTOShort> getAllUsers() {
-        return service.findAll();
+    public ResponseEntity getAllUsers() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/full")
-    public List<UserResponseDTO> getAllUsersFull() {
-        return service.findAllFull();
+    public ResponseEntity getAllUsersFull() {
+        return ResponseEntity.ok(service.findAllFull());
     }
 
     @GetMapping("/search")
-    public List<UserResponseDTOShort> getAllUserByName(@RequestParam("username") String username) {
-        return service.findAllByUsername(username);
+    public ResponseEntity getAllUserByName(@RequestParam("username") String username) {
+        return ResponseEntity.ok(service.findAllByUsername(username));
     }
 
     @GetMapping("/full/{id}")
-    public UserResponseDTO getUserFull(@PathVariable(value = "id") Long userId) {
-        return service.findByIdFull(userId);
+    public ResponseEntity getUserFull(@PathVariable(value = "id") Long userId) {
+        return ResponseEntity.ok(service.findByIdFull(userId));
     }
 
     @GetMapping("/{id}")
-    public UserResponseDTOShort getUser(@PathVariable(value = "id") Long userId) {
-        return service.findById(userId);
+    public ResponseEntity getUser(@PathVariable(value = "id") Long userId) {
+        return ResponseEntity.ok(service.findById(userId));
     }
 
     @PostMapping("/new")
-    public UserResponseDTO createUser(@RequestBody UserDTO newUser) {
-        return service.save(newUser);
+    public ResponseEntity createUser(@RequestBody UserDTO newUser) {
+        return ResponseEntity.ok(service.save(newUser));
     }
 
     @PutMapping("/change-infomation")
-    public UserResponseDTO changeUserInfomation(@RequestBody User oldUser) {
+    public ResponseEntity changeUserInfomation(@RequestBody User oldUser) {
         if (service.checkExist(oldUser.getId())) {
-            return service.updateOne(oldUser);
+            return ResponseEntity.ok(service.updateOne(oldUser));
         } else {
-            throw new NoSuchElementException("No value present");
+            throw new EntityNotFoundException("No value present");
         }
     }
 
     @DeleteMapping("/delete")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void DeleteUser(@RequestParam("id") long id) {
+    public ResponseEntity DeleteUser(@RequestParam("id") long id) {
         if (service.checkExist(id)) {
             service.deleteById(id);
+            return ResponseEntity.accepted().body("Delete Successfully");
         } else {
-            throw new NoSuchElementException("No value present");
+            throw new EntityNotFoundException("No value present");
         }
     }
 }

@@ -4,7 +4,7 @@
  */
 package rookiesspring.controller;
 
-import java.util.List;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.CategoryDTO;
-import rookiesspring.dto.response.CategoryResponseDTO;
-import rookiesspring.dto.response.custom.CategoryResponseDTOShort;
 import rookiesspring.service.CategoryService;
 
 /**
@@ -38,48 +36,51 @@ public class CategoryController {
      * @return List of all Categories
      */
     @GetMapping({"", "/", "/all"})
-    public List<CategoryResponseDTOShort> getAllCategory() {
-        return service.findAll();
+    public ResponseEntity getAllCategory() {
+        return ResponseEntity.ok(service.findAll());
     }
 
     /**
      * Find One Category With {@code Id}
+     *
      * @param id
      * @return Category With Id
      * @throws ResourceNotFoundException()
      */
     @GetMapping("/{id}")
-    public CategoryResponseDTOShort getOneCategory(@PathVariable(name = "id") long id) {
-        return service.findById(id);
+    public ResponseEntity getOneCategory(@PathVariable(name = "id") long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
+
     /**
-     * Find All Category, Include Product in Short Form to make
-     * No Extra Call to Database
+     * Find All Category, Include Products in it Short Form to make No Extra
+     * Call to Database
+     *
      * @return List of all Categories with associated Products
      */
     @GetMapping("/full")
-    public List<CategoryResponseDTO> getAllCategoryFull() {
-        return service.findAllFull();
+    public ResponseEntity getAllCategoryFull() {
+        return ResponseEntity.ok(service.findAllFull());
     }
 
     @GetMapping("/full/{id}")
-    public CategoryResponseDTO getOneCategoryFull(@PathVariable(name = "id") long id) {
-        return service.findByIdFull(id);
+    public ResponseEntity getOneCategoryFull(@PathVariable(name = "id") long id) {
+        return ResponseEntity.ok(service.findByIdFull(id));
     }
 
     @GetMapping("/search")
-    public List<CategoryResponseDTOShort> findAllCategoryByName(@RequestParam() String name) {
-        return service.findAllByName(name);
+    public ResponseEntity findAllCategoryByName(@RequestParam() String name) {
+        return ResponseEntity.ok(service.findAllByName(name));
     }
 
     @PostMapping("/new")
-    public CategoryResponseDTO addCategory(@RequestBody() CategoryDTO category) {
-        return service.save(category);
+    public ResponseEntity addCategory(@RequestBody() CategoryDTO category) {
+        return ResponseEntity.ok(service.save(category));
     }
 
     @PostMapping("/add-product")
-    public CategoryResponseDTO addProduct(@RequestBody() CD_ID id) {
-        return service.addProduct(id.category_id(), id.product_ids());
+    public ResponseEntity addProduct(@RequestBody() CD_ID id) {
+        return ResponseEntity.ok(service.addProduct(id.category_id(), id.product_ids()));
     }
 
 }
