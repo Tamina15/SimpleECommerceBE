@@ -11,6 +11,6 @@ import rookiesspring.dto.response.custom.UserResponseDTOShort;
  *
  * @author HP
  */
-public record OrderResponseDTO(long id, double totalPrice, LocalDateTime createdDate, UserResponseDTOShort user) {
+public record OrderResponseDTO(long id, String totalPrice, LocalDateTime createdDate, UserResponseDTOShort user) {
 
 }

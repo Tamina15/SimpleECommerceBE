@@ -33,7 +33,7 @@ public class OrderMapper implements BaseMapper<Order, OrderDTO, OrderResponseDTO
 
     @Override
     public OrderResponseDTO ToResponseDTO(Order e) {
-        OrderResponseDTO o = new OrderResponseDTO(e.getId(), e.getTotalPrice(), e.getCreatedTime(), userMapper.ToResponseDTOShort(e.getUser()));
+        OrderResponseDTO o = new OrderResponseDTO(e.getId(), e.getTotalPrice(), e.getCreatedDate(), userMapper.ToResponseDTOShort(e.getUser()));
         return o;
     }
 

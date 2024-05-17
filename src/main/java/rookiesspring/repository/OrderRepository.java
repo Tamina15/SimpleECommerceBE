@@ -4,7 +4,11 @@
  */
 package rookiesspring.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import rookiesspring.dto.response.custom.OrderResponseDTOShort;
 import rookiesspring.model.Order;
 
 /**
@@ -13,7 +17,12 @@ import rookiesspring.model.Order;
  */
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
+    public List<Order> findAllByCreatedDateBetween(LocalDateTime from, LocalDateTime to);
 
-        boolean existsById(long id);
+//    @Query(value= "SELECT o from Order o join fetch user u")
+    public List<OrderResponseDTOShort> findAllProjectedByCreatedDateBetween(LocalDateTime from, LocalDateTime to);
 
+    public Optional<OrderResponseDTOShort> findOneProjectedById(long id);
+
+    boolean existsById(long id);
 }

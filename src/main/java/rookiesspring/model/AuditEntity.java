@@ -26,13 +26,13 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public abstract class AuditEntity<P extends Serializable> extends IdEntity<P> implements Persistable<P> {
 
-    @Column(name = "DATE_CREATED")
+    @Column(name = "created_at")
     @CreatedDate
-    LocalDateTime dateCreated;
+    LocalDateTime createdDate;
 
-    @Column(name = "DATE_MODIFIED")
+    @Column(name = "updated_at")
     @LastModifiedDate
-    LocalDateTime dateModified;
+    LocalDateTime updatedDate;
 
     @Transient
     @Override
