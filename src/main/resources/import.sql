@@ -289,6 +289,14 @@ insert into image(product_id, url, name, description, created_at, updated_at) va
 insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-2.jpg', 'Product 1 Image', 'Additional Image of product 1', now(), now());
 insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-3.jpg', 'Product 1 Image', 'Back Image of product 1', now(), now());
 insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-4.jpg', 'Product 1 IMage', 'Topdown Image of product 1', now(), now());
+insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-5.jpg', 'Product 1 IMage', 'Topdown Image of product 1', now(), now());
+insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-6.jpg', 'Product 1 IMage', 'Topdown Image of product 1', now(), now());
+insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-7.jpg', 'Product 1 IMage', 'Topdown Image of product 1', now(), now());
+insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-8.jpg', 'Product 1 IMage', 'Topdown Image of product 1', now(), now());
+insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-9.jpg', 'Product 1 IMage', 'Topdown Image of product 1', now(), now());
+insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-10.jpg', 'Product 1 IMage', 'Topdown Image of product 1', now(), now());
+insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-11.jpg', 'Product 1 IMage', 'Topdown Image of product 1', now(), now());
+insert into image(product_id, url, name, description, created_at, updated_at) values(1, 'image1-12.jpg', 'Product 1 IMage', 'Topdown Image of product 1', now(), now());
 -- insert into image(product_id, url, name, description, created_at, updated_at) values(2, 'image2.jpg', 'Product 2 Thumbnail', 'Image of product 2', now(), now());
 -- insert into image(product_id, url, name, description, created_at, updated_at) values(3, 'image3.jpg', 'Product 3 Thumbnail', 'Image of product 3', now(), now());
 -- insert into image(product_id, url, name, description, created_at, updated_at) values(4, 'image4.jpg', 'Product 4 Thumbnail', 'Image of product 4', now(), now());
