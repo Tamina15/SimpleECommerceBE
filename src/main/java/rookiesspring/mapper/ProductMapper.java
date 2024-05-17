@@ -5,6 +5,7 @@
 package rookiesspring.mapper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,14 @@ public class ProductMapper implements BaseMapper<Product, ProductDTO, ProductRes
         Product product = new Product();
         product.setName(dto.name());
         product.setDescription(dto.description());
-        product.setPrice(dto.price());
+        if (dto.price() >= 0) {
+            product.setPrice(dto.price());
+        }
+        if (dto.amount() > 0) {
+            product.setAmount(dto.amount());
+        }
+        product.setCategory(new HashSet<>());
+        product.setImages(new HashSet<>());
         return product;
     }
 

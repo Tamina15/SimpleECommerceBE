@@ -8,14 +8,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
@@ -33,25 +29,22 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @Setter
 @ToString
-public class Product extends AuditEntity<Long>{
-
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private long id;
+public class Product extends AuditEntity<Long> {
 
     private String name;
     private String description;
     private double price;
 
-   @ColumnDefault(value = "false")
+    @ColumnDefault(value = "false")
     private boolean feature;
+
     @ColumnDefault(value = "0")
     private int amount;
 
     @ColumnDefault(value = "'none'")
     private String rating;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany()
     @JoinTable(name = "product_category",
             joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
@@ -60,7 +53,7 @@ public class Product extends AuditEntity<Long>{
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL)
     @JsonManagedReference
-    Set<Image> images;
+    private Set<Image> images;
 
     public boolean checkAmount() {
         return amount > 0;
@@ -72,6 +65,18 @@ public class Product extends AuditEntity<Long>{
 
     public boolean addCategory(Category c) {
         return category.add(c);
+    }
+
+    public boolean addImage(Image i) {
+        return images.add(i);
+    }
+
+    public boolean removeCategory(Category c) {
+        return category.remove(c);
+    }
+
+    public boolean removeImage(Image i) {
+        return images.remove(i);
     }
 
     @Override

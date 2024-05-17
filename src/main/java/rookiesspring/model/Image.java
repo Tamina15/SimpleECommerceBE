@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
 package rookiesspring.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -28,21 +27,16 @@ import lombok.ToString;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @ToString
-public class Image extends AuditEntity<Long>{
+public class Image extends AuditEntity<Long> {
 
-//    @Id()
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private long id;
-    
     @Column(unique = true, nullable = false)
     private String url;
-    
+
     private String name;
     private String description;
-    
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     private Product product;
-    
-    
+
 }

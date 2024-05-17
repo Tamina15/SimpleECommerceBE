@@ -21,15 +21,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query(value = "select c from Category c left join fetch c.products")
     List<Category> findAll();
 
-    /**
-     * For Join Table Use Only
-     *
-     * @param id
-     * @return
-     */
-//    @Override
-//    @Query(value = "select c from Category c join fetch c.products join fetch c.products.product")
-//    List<Category> findAll();
     @Query(value = "select c from Category c join c.products where c.id = ?1")
     Optional<Category> findId(long id);
 
@@ -42,5 +33,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     public List<CategoryResponseDTOShort> findAllProjectedByNameContainsIgnoreCase(String name);
 
     boolean existsById(long id);
+    
+    @Query(value = "select c.id from Category c")
+    public long[] getAllId();
 
 }

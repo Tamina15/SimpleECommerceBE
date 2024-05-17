@@ -4,9 +4,12 @@
  */
 package rookiesspring.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import rookiesspring.dto.response.custom.ProductResponseDTOShort;
 import rookiesspring.model.Product;
 
@@ -20,25 +23,25 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "select p from Product p left join fetch p.category left join fetch p.images")
     List<Product> findAll();
 
-//    @Query(value = "select p from Product p left join fetch Rate r on p.id = r.id")
-//    List<Product> findAllRating();
+    @Query(value = "select p from Product p left join fetch p.category c left join fetch p.images where (p.createdDate between :from and :to)")
+    public List<Product> findAll(LocalDateTime from, LocalDateTime to);
 
-//    @Override
-//    @Query(value = "select p from Product p left join fetch p.category left join fetch p.category.category left join p.images")
-//    List<Product> findAll();
-
-    List<ProductResponseDTOShort> findAllProjectedBy();
-
-    public List<Product> findAllByName(String name);
+    @Query(value = "select p from Product p left join fetch p.category c left join fetch p.images "
+            + "where (LOWER(p.name) LIKE concat('%', LOWER(:name), '%')) and "
+            + "c in :category_ids and "
+            + "(p.createdDate between :from and :to)")
+    public List<Product> findAll(@Param(value = "name") String name,
+            @Param(value = "category_ids") long[] category_ids,
+            @Param(value = "from") LocalDateTime from,
+            @Param(value = "to") LocalDateTime to);
 
     public ProductResponseDTOShort findProjectedById(long id);
 
     boolean existsById(long id);
 
-//    @Query(value = "select p from Product p join p.category join p.category.category c where c.id in ?1")
-//    public List<Product> findAllByCategory(long[] category_id);
+    public List<Product> getReferenceByIdIn(long[] product_id);
+    
+//    @Query(value = "select p from Product p left join fetch p.category left join fetch p.images where p.id = ?1")
+//    public Optional<Product> findById(long id);
 
-    public List<ProductResponseDTOShort> findAllProjectedByCategoryIn(long[] category_id);
-
-    public List<Product> getReferenceByIdIn(long[] product_id);    
 }

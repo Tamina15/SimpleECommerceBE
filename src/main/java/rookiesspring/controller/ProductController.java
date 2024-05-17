@@ -4,15 +4,22 @@
  */
 package rookiesspring.controller;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import rookiesspring.dto.ImageDTO;
 import rookiesspring.dto.ProductDTO;
+import rookiesspring.dto.update.ProductUpdateDTO;
 import rookiesspring.service.ProductService;
 
 /**
@@ -29,14 +36,13 @@ public class ProductController {
         this.service = service;
     }
 
-    @GetMapping({"", "/"})
-    public ResponseEntity getAllProduct() {
-        return ResponseEntity.ok(service.findAll());
-    }
-
-    @GetMapping("/by-category")
-    public ResponseEntity getAllProductByCategory(@RequestBody() long[] category_id) {
-        return ResponseEntity.ok(service.findAllByCategory(category_id));
+    @GetMapping({"", "/", "/all"})
+    public ResponseEntity getAllProduct(@RequestParam(required = false, value = "name") String name,
+            @RequestParam(value = "category_id", required = false) long[] category_id,
+            @RequestParam(name = "from", required = false) LocalDateTime from,
+            @RequestParam(name = "to", required = false) LocalDateTime to) {
+        System.out.println(name + " " + Arrays.toString(category_id) + " " + from + " " + to);
+        return ResponseEntity.ok(service.findAll(name, category_id, from, to));
     }
 
     @GetMapping("/{id}")
@@ -44,24 +50,60 @@ public class ProductController {
         return ResponseEntity.ok(service.findOneById(id));
     }
 
-    @GetMapping("/full")
-    public ResponseEntity getAllProductFull() {
-        return ResponseEntity.ok(service.findAllFull());
-    }
-
     @GetMapping("/full/{id}")
     public ResponseEntity getProductByIdFull(@PathVariable("id") long id) {
         return ResponseEntity.ok(service.findOneByIdFull(id));
     }
 
-    @PostMapping("/new")
+    @PostMapping("/")
     public ResponseEntity addProduct(@RequestBody() ProductDTO product) {
         return ResponseEntity.ok(service.save(product));
     }
 
-    @PostMapping("/add-category")
-    public ResponseEntity addCategory(@RequestParam("product_id") long product_id, @RequestParam("category_id") long category_id) {
-        return ResponseEntity.ok(service.addCategory(product_id, category_id));
+    /**
+     *  Need Condition check
+     * @param product
+     * @return
+     */
+    @PutMapping("/")
+    public ResponseEntity updateProduct(@RequestBody() ProductUpdateDTO product) {
+        return ResponseEntity.ok(service.update(product));
+    }
+// check
+    @PatchMapping("/category")
+    public ResponseEntity addCategories(@RequestParam("product_id") long product_id, @RequestParam("category_id") long[] category_id) {
+        service.addCategories(product_id, category_id);
+        return ResponseEntity.ok().body("Add Category Successfully");
     }
 
+    @PatchMapping("/image/")
+    public ResponseEntity addImages(@RequestBody() AddImageDTO add_image) {
+        service.addImages(add_image.product_id(), add_image.images());
+        return ResponseEntity.ok().body("Add Image Successfully");
+    }
+
+    @PatchMapping("/category/remove")
+    public ResponseEntity removeCategories(@RequestParam("product_id") long product_id, @RequestParam("category_id") long[] category_id) {
+        service.removeCategories(product_id, category_id);
+        return ResponseEntity.ok().body("Remove Category Successfully");
+    }
+
+    @PatchMapping("/image/remove/")
+    public ResponseEntity removeImages(@RequestBody() RemoveImageDTO remove_image) {
+        System.out.println(Arrays.toString(remove_image.image_id()));
+        service.removeImages(remove_image.product_id(), remove_image.image_id());
+        return ResponseEntity.ok().body("Remove Image Successfully");
+    }
+
+    @DeleteMapping("/")
+    public ResponseEntity deleteProduct(@RequestBody() long id) {
+        service.delete(id);
+        return ResponseEntity.accepted().body("Delete Successfully");
+    }
+}
+record AddImageDTO(long product_id, ImageDTO[] images){
+    
+}
+record RemoveImageDTO(long product_id, long[] image_id){
+    
 }
