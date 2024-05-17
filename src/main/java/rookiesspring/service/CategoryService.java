@@ -15,6 +15,7 @@ import rookiesspring.mapper.CategoryMapper;
 import rookiesspring.model.Category;
 import rookiesspring.model.Product;
 import rookiesspring.repository.CategoryRepository;
+import rookiesspring.repository.ProductRepository;
 import rookiesspring.service.interfaces.CategoryServiceInterface;
 
 /**
@@ -28,7 +29,7 @@ public class CategoryService implements CategoryServiceInterface {
 
     CategoryRepository repository;
     CategoryMapper mapper;
-    ProductService productService;
+    ProductRepository productRepository;
 
     public CategoryService(CategoryRepository repository, CategoryMapper mapper) {
         this.repository = repository;
@@ -67,49 +68,21 @@ public class CategoryService implements CategoryServiceInterface {
     public CategoryResponseDTO addProduct(long category_id, long[] product_ids) {
         Category c = repository.findById(category_id).orElseThrow(() -> new ResourceNotFoundException());
         for (long id : product_ids) {
-            Product p = productService.repository.getReferenceById(id);
+            Product p = productRepository.getReferenceById(id);
             p.addCategory(c);
-            productService.repository.save(p);
+            productRepository.save(p);
         }
         return mapper.ToResponseDTO(c);
     }
 
-//    public CategoryResponseDTO save(CategoryDTO categoryDTO) {
-//        Category c = mapper.toEntity(categoryDTO);
-//        Category result = repository.save(c);
-//        List<Product_Category> list_pc = new ArrayList();
-//        for (long id : categoryDTO.product_id()) {
-//            Product product = new Product(id);
-//            Product_Category pc = new Product_Category(product, result);
-//            list_pc.add(pc);
-//        }
-//        result.setProducts(list_pc);
-//        result = repository.save(result);
-//
-//        return mapper.ToResponseDTO(result);
-//    }
-//
-//    public CategoryResponseDTO addProduct(long category_id, long[] product_ids) {
-//        Category category = repository.findId(category_id).orElseThrow(() -> new ResourceNotFoundException());
-//        List<Product_Category> list_pc = category.getProducts();
-//        for (long id : product_ids) {
-//            Product product = new Product(id);
-//            Product_Category pc = new Product_Category(product, category);
-//            if (!list_pc.contains(pc)) {
-//                list_pc.add(pc);
-//            }
-//        }
-//        Category result = repository.save(category);
-//        return mapper.ToResponseDTO(result);
-//    }
     @Override
     public boolean checkExist(long id) {
         return repository.existsById(id);
     }
 
     @Autowired
-    public void setProductService(ProductService productService) {
-        this.productService = productService;
+    public void setProductRepository(ProductRepository productRepository) {
+        this.productRepository = productRepository;
     }
 
 }
