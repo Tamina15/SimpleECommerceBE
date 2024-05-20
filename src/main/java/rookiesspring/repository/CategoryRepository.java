@@ -33,8 +33,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     public List<CategoryResponseDTOShort> findAllProjectedByNameContainsIgnoreCase(String name);
 
     boolean existsById(long id);
-    
+
     @Query(value = "select c.id from Category c")
     public long[] getAllId();
-
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rookiesspring.dto.CategoryDTO;
 import rookiesspring.dto.response.CategoryResponseDTO;
+import rookiesspring.dto.response.custom.CategoryResponseDTOShort;
 import rookiesspring.dto.response.custom.ProductResponseDTOShort;
 import rookiesspring.model.Category;
 
@@ -53,6 +54,11 @@ public class CategoryMapper implements BaseMapper<Category, CategoryDTO, Categor
     @Autowired
     public void setProductMapper(ProductMapper productMapper) {
         this.productMapper = productMapper;
+    }
+
+    public CategoryResponseDTOShort ToResponseDTOShort(Category c) {
+        CategoryResponseDTOShort dto = new CategoryResponseDTOShort(c.getId(), c.getName(), c.getDescription());
+        return dto;
     }
 
 }
