@@ -8,12 +8,13 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 /**
  *
@@ -23,22 +24,23 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@SQLDelete(sql = "UPDATE category SET deleted = true WHERE id=?")
+@SQLRestriction(value = "deleted=false")
 public class Category extends AuditEntity<Long> {
 
     private String name;
     private String description;
 
-    @ManyToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JsonBackReference
     private Set<Product> products;
 
     public void addProduct(Product p) {
-        if (products != null) {
-            products.add(p);
-        } else {
-            products = new HashSet<>();
-            products.add(p);
-        }
+        products.add(p);
+    }
+
+    public void removeProduct(Product p) {
+        products.remove(p);
     }
 
     @Override

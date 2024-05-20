@@ -4,20 +4,18 @@
  */
 package rookiesspring.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 /**
  *
@@ -28,16 +26,14 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@SQLDelete(sql = "UPDATE supplier SET deleted = true WHERE id=?")
+@SQLRestriction(value = "deleted=false")
 public class Supplier extends AuditEntity<Long> {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
     
     private String name;
     
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "supplier")
     @JsonManagedReference()
-//    @JsonBackReference
     private List<ImportBill> import_bill;
     
     @Embedded

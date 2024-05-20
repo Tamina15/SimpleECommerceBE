@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package rookiesspring.model;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -34,10 +35,12 @@ public abstract class AuditEntity<P extends Serializable> extends IdEntity<P> im
     @LastModifiedDate
     LocalDateTime updatedDate;
 
+    boolean deleted = Boolean.FALSE;
+
     @Transient
     @Override
-    public boolean isNew () {
+    public boolean isNew() {
         return null == getId();
     }
-    
+
 }

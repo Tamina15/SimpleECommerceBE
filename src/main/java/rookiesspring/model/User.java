@@ -18,6 +18,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 /**
  *
@@ -30,6 +32,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "`user`")
+@SQLDelete(sql = "UPDATE 'user' SET deleted = true WHERE id=?")
+@SQLRestriction(value = "deleted=false")
 public class User extends AuditEntity<Long> {
 
     @Column(unique = true)

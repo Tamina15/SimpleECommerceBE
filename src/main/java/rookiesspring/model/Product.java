@@ -19,6 +19,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 /**
  *
@@ -29,6 +31,8 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @Setter
 @ToString
+@SQLDelete(sql = "UPDATE product SET deleted = true WHERE id=?")
+@SQLRestriction(value = "deleted=false")
 public class Product extends AuditEntity<Long> {
 
     private String name;
@@ -44,7 +48,7 @@ public class Product extends AuditEntity<Long> {
     @ColumnDefault(value = "'none'")
     private String rating;
 
-    @ManyToMany()
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(name = "product_category",
             joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
@@ -52,7 +56,7 @@ public class Product extends AuditEntity<Long> {
     private Set<Category> category;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference()
     private Set<Image> images;
 
     public boolean checkAmount() {

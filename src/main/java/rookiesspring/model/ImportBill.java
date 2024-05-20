@@ -6,17 +6,12 @@ package rookiesspring.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import jakarta.persistence.Transient;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,6 +20,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import rookiesspring.model.composite_model.Product_ImportBill;
 
 /**
@@ -37,22 +34,15 @@ import rookiesspring.model.composite_model.Product_ImportBill;
 @AllArgsConstructor
 @Getter
 @Setter
-//@ToString
+@SQLDelete(sql = "UPDATE import_bill SET deleted = true WHERE id=?")
+@SQLRestriction(value = "deleted=false")
 public class ImportBill extends AuditEntity<Long>{
-
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
 
     private String name;
 
     @Column(updatable = false)
     @ColumnDefault(value = "0")
     private double totalPrice =0;
-
-    @Column(updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime importDate = LocalDateTime.now();
 
     @Column(nullable = false)
     @ColumnDefault(value = "false")
@@ -61,20 +51,15 @@ public class ImportBill extends AuditEntity<Long>{
     @ManyToOne  // field name inside db
     @JoinColumn(name = "supplier_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference
-//    @JsonManagedReference
     private Supplier supplier;
 
     @OneToMany(mappedBy = "importbill")
     @JsonManagedReference
     private List<Product_ImportBill> products = new ArrayList<>();
 
-    @Transient
-    transient List<Product> p;
-
-    public ImportBill(String name, Supplier supplier, List<Product> p) {
+    public ImportBill(String name, Supplier supplier) {
         this.name = name;
         this.supplier = supplier;
-        this.p = p;
     }
 
     // https://vladmihalcea.com/the-best-way-to-map-a-many-to-many-association-with-extra-columns-when-using-jpa-and-hibernate/
@@ -82,7 +67,6 @@ public class ImportBill extends AuditEntity<Long>{
         Product_ImportBill pi = new Product_ImportBill(p, this);
         pi.setAmount(amount);
         products.add(pi);
-//        p.getImport_bill().add(pi);
     }
 
     public void removeProduct(Product product) {
@@ -99,38 +83,10 @@ public class ImportBill extends AuditEntity<Long>{
             }
         }
     }
-//
-//    @Override
-//    public String toString() {
-//        String s = "";
-//        s += name + " ";
-//        if (products == null) {
-//            System.out.println("product null");
-//        }
-//        for (Product_ImportBill pi : products) {
-//            if (pi != null) {
-//                Product p = pi.getProduct();
-//                ImportBill i = pi.getImportbill();
-//                if (p == null) {
-//                    System.out.println("product null ");
-//                } else {
-//                    System.out.print(p.getId() + " ");
-//                }
-//                if (i == null) {
-//                    System.out.println("import null ");
-//                } else {
-//                    System.out.print(i.getId() + " ");
-//                }
-//            } else {
-//                System.out.println("Product_ImportBill null ");
-//            }
-//        }
-//        return s;
-//    }
 
     @Override
     public String toString() {
-        return "ImportBill{" + "id=" + getId() + ", name=" + name + ", totalPrice=" + totalPrice + ", importDate=" + importDate + ", processed=" + processed + ", supplier=" + supplier.getId() + ", products=" + products.size() + ", p=" + p + '}';
+        return "ImportBill{" + "id=" + getId() + ", name=" + name + ", totalPrice=" + totalPrice + ", processed=" + processed + ", supplier=" + supplier.getId() + ", products=" + products.size() + '}';
     }
 
 }
