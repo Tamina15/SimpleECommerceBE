@@ -4,12 +4,12 @@
  */
 package rookiesspring.controller;
 
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,7 +37,7 @@ public class ProductController {
     }
 
     @GetMapping({"", "/", "/all"})
-    public ResponseEntity getAllProduct(@RequestParam(required = false, value = "name") String name,
+    public ResponseEntity getAllProduct( @RequestParam(required = false, value = "name") String name,
             @RequestParam(value = "category_id", required = false) long[] category_id,
             @RequestParam(name = "from", required = false) LocalDateTime from,
             @RequestParam(name = "to", required = false) LocalDateTime to) {
@@ -61,7 +61,8 @@ public class ProductController {
     }
 
     /**
-     *  Need Condition check
+     * Need Condition check
+     *
      * @param product
      * @return
      */
@@ -70,6 +71,7 @@ public class ProductController {
         return ResponseEntity.ok(service.update(product));
     }
 // check
+
     @PostMapping("/category")
     public ResponseEntity addCategories(@RequestParam("product_id") long product_id, @RequestParam("category_id") long[] category_id) {
         service.addCategories(product_id, category_id);
@@ -100,10 +102,18 @@ public class ProductController {
         service.delete(id);
         return ResponseEntity.accepted().body("Delete Successfully");
     }
+
+    @PostMapping("/add-image")
+    public void AddImage() {
+
+    }
+
 }
-record AddImageDTO(long product_id, ImageDTO[] images){
-    
+
+record AddImageDTO(long product_id, ImageDTO[] images) {
+
 }
-record RemoveImageDTO(long product_id, long[] image_id){
-    
+
+record RemoveImageDTO(long product_id, long[] image_id) {
+
 }

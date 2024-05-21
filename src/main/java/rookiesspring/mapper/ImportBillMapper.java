@@ -28,12 +28,8 @@ public class ImportBillMapper implements BaseMapper<ImportBill, ImportBillDTO, I
     public ImportBill toEntity(ImportBillDTO dto) {
         Supplier s = new Supplier();
         s.setId(dto.supplier_id());
-        List<Product> product_list = new ArrayList<>();
-        for (long l : dto.products_ids()) {
-            Product p = new Product();
-            p.setId(l);
-        }
-        ImportBill i = new ImportBill(dto.name(), s, product_list);
+        
+        ImportBill i = new ImportBill(dto.name(), s);
         return i;
     }
 
@@ -47,7 +43,7 @@ public class ImportBillMapper implements BaseMapper<ImportBill, ImportBillDTO, I
             products[i] = p_dto;
         }
         SupplierResponseDTOShort s = new SupplierResponseDTOShort(e.getSupplier().getId(), e.getSupplier().getName(), e.getSupplier().getAddress());
-        ImportBillResponseDTO i = new ImportBillResponseDTO(e.getId(), e.getName(), e.getTotalPrice(), e.getImportDate(), e.isProcessed(), s, products);
+        ImportBillResponseDTO i = new ImportBillResponseDTO(e.getId(), e.getName(), e.getTotalPrice(), e.getCreatedDate(), e.isProcessed(), s, products);
         return i;
     }
 
