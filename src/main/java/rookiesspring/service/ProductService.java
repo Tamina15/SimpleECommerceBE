@@ -96,7 +96,7 @@ public class ProductService implements ProductServiceInterface {
         Product p = mapper.toEntity(product_dto);
         if (product_dto.category_id() != null) {
             for (long id : product_dto.category_id()) {
-                Category c = categoryRepository.findId(id).get();
+                Category c = categoryRepository.getReferenceById(id);
                 p.addCategory(c);
             }
         }
@@ -181,26 +181,26 @@ public class ProductService implements ProductServiceInterface {
     public boolean checkExist(long id) {
         return repository.existsById(id);
     }
+
     @Autowired
     RateRepository rateRepository;
 
-    @EventListener(ApplicationReadyEvent.class)
-    @Transactional
-    public void doSomethingAfterStartup() {
-        List<Product> products = repository.findAll();
-        for (Product p : products) {
-            List<Rate> rates = rateRepository.findAllByProductId(p.getId());
-            if (!rates.isEmpty()) {
-                double score = 0;
-                for (Rate r : rates) {
-                    score += r.getScore();
-                }
-                score = score / rates.size();
-                p.setRating(Double.toString(score));
-                repository.save(p);
-            }
-        }
-        System.out.println("Finding all Rating");
-    }
-
+//    @EventListener(ApplicationReadyEvent.class)
+//    @Transactional
+//    public void doSomethingAfterStartup() {
+//        List<Product> products = repository.findAll();
+//        for (Product p : products) {
+//            List<Rate> rates = rateRepository.findAllByProductId(p.getId());
+//            if (!rates.isEmpty()) {
+//                double score = 0;
+//                for (Rate r : rates) {
+//                    score += r.getScore();
+//                }
+//                score = score / rates.size();
+//                p.setRating(Double.toString(score));
+//                repository.save(p);
+//            }
+//        }
+//        System.out.println("Finding all Rating");
+//    }
 }

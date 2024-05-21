@@ -6,8 +6,8 @@ package rookiesspring.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import rookiesspring.dto.response.custom.ProductResponseDTOShort;
@@ -17,7 +17,7 @@ import rookiesspring.model.Product;
  *
  * @author HP
  */
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product>{
 
     @Override
     @Query(value = "select p from Product p left join fetch p.category left join fetch p.images")
@@ -36,11 +36,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param(value = "to") LocalDateTime to);
 
     public ProductResponseDTOShort findProjectedById(long id);
-
-    boolean existsById(long id);
-
+    
     public List<Product> getReferenceByIdIn(long[] product_id);
     
+    public int[] findAllPriceByIdIn(long[] id);
 //    @Query(value = "select p from Product p left join fetch p.category left join fetch p.images where p.id = ?1")
 //    public Optional<Product> findById(long id);
 

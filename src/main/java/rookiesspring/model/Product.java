@@ -59,12 +59,16 @@ public class Product extends AuditEntity<Long> {
     @JsonManagedReference()
     private Set<Image> images;
 
+    public Product(long id) {
+        this.setId(id);
+    }
+
     public boolean checkAmount() {
         return amount > 0;
     }
 
     public boolean checkAmount(int a) {
-        return amount >= a;
+        return a > 0 && amount >= a;
     }
 
     public boolean addCategory(Category c) {
@@ -101,7 +105,7 @@ public class Product extends AuditEntity<Long> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Category other = (Category) obj;
+        final Product other = (Product) obj;
         return Objects.equals(getId(), other.getId());
     }
 

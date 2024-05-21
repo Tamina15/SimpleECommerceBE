@@ -70,25 +70,25 @@ public class ProductController {
         return ResponseEntity.ok(service.update(product));
     }
 // check
-    @PatchMapping("/category")
+    @PostMapping("/category")
     public ResponseEntity addCategories(@RequestParam("product_id") long product_id, @RequestParam("category_id") long[] category_id) {
         service.addCategories(product_id, category_id);
         return ResponseEntity.ok().body("Add Category Successfully");
     }
 
-    @PatchMapping("/image/")
+    @PostMapping("/image/")
     public ResponseEntity addImages(@RequestBody() AddImageDTO add_image) {
         service.addImages(add_image.product_id(), add_image.images());
         return ResponseEntity.ok().body("Add Image Successfully");
     }
 
-    @PatchMapping("/category/remove")
+    @DeleteMapping("/category")
     public ResponseEntity removeCategories(@RequestParam("product_id") long product_id, @RequestParam("category_id") long[] category_id) {
         service.removeCategories(product_id, category_id);
         return ResponseEntity.ok().body("Remove Category Successfully");
     }
 
-    @PatchMapping("/image/remove/")
+    @DeleteMapping("/image/")
     public ResponseEntity removeImages(@RequestBody() RemoveImageDTO remove_image) {
         System.out.println(Arrays.toString(remove_image.image_id()));
         service.removeImages(remove_image.product_id(), remove_image.image_id());
