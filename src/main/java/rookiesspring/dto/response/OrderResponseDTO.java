@@ -5,12 +5,14 @@
 package rookiesspring.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import rookiesspring.dto.response.custom.UserResponseDTOShort;
+import rookiesspring.dto.update.Product_Amount;
 
 /**
  *
  * @author HP
  */
-public record OrderResponseDTO(long id, String totalPrice, LocalDateTime createdDate, UserResponseDTOShort user) {
+public record OrderResponseDTO(long id, String totalPrice, LocalDateTime createdDate, UserResponseDTOShort user, Set<Product_Amount> products, boolean processed) {
 
 }

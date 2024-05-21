@@ -6,6 +6,7 @@ package rookiesspring.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -17,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import rookiesspring.model.composite_model.Order_Detail;
@@ -31,20 +33,24 @@ import rookiesspring.model.composite_model.Order_Detail;
 @Getter
 @Setter
 @ToString
-@SQLDelete(sql = "UPDATE 'order' SET deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE \"order\" SET deleted = true WHERE id=?")
 @SQLRestriction(value = "deleted=false")
 public class Order extends AuditEntity<Long> {
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)  // field name inside db
+    @ManyToOne(fetch = FetchType.LAZY)  // field name inside db
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference
     private User user;
 
     private String totalPrice;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<Order_Detail> details;
 
+    @Column(nullable = false)
+    @ColumnDefault(value = "false")
+    private boolean processed = false;
+    
     /**
      * @param product
      * @param amount
@@ -69,4 +75,5 @@ public class Order extends AuditEntity<Long> {
         Order_Detail od = new Order_Detail(this, product);
         details.remove(od);
     }
+    
 }

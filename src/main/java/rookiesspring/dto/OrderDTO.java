@@ -5,10 +5,12 @@
 
 package rookiesspring.dto;
 
+import rookiesspring.dto.update.Product_Amount;
+
 /**
  *
  * @author HP
  */
-public record OrderDTO (long user_id) {
+public record OrderDTO (long user_id, Product_Amount[] products) {
     
 }

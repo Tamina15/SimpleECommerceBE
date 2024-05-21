@@ -6,6 +6,9 @@ package rookiesspring.exception;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import jdk.jshell.spi.ExecutionControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,32 +23,35 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity handleException(Exception e) {
-        var error = ErrorResponse.builder().code(HttpStatus.INTERNAL_SERVER_ERROR.value()).message(e.getMessage() != null ? e.getMessage() : "Internal Server Error").build();
-        System.out.println(error);
+    public ResponseEntity buildException(Integer errorCode, String message) {
+        var error = ErrorResponse.builder().code(errorCode).message(message).build();
         return ResponseEntity.status(error.getCode()).body(error);
     }
 
+    @ExceptionHandler({Exception.class, RuntimeException.class})
+    public ResponseEntity handleException(Exception e) {
+        Logger.getLogger(GlobalExceptionHandler.class.getName()).log(Level.SEVERE, null, e);
+        return buildException(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage() != null ? e.getMessage() : "Internal Server Error");
+    }
+
     @ExceptionHandler({ResourceNotFoundException.class, EntityNotFoundException.class})
-    protected ResponseEntity handleResourceNotFoundException(RuntimeException exception) {
-        var error = ErrorResponse.builder().code(HttpStatus.NOT_FOUND.value()).message(exception.getMessage() != null ? exception.getMessage() : "Resource Not Found").build();
-        System.out.println(error);
-        return ResponseEntity.status(error.getCode()).body(error);
+    protected ResponseEntity handleResourceNotFoundException(RuntimeException e) {
+        return buildException(HttpStatus.NOT_FOUND.value(), e.getMessage() != null ? e.getMessage() : "Resource Not Found");
     }
 
     @ExceptionHandler({EntityExistsException.class})
     public ResponseEntity handleEntityExistsException(RuntimeException e) {
-        var error = ErrorResponse.builder().code(HttpStatus.CONFLICT.value()).message(e.getMessage() != null ? e.getMessage() : "Already Exist").build();
-        System.out.println(error);
-        return ResponseEntity.status(error.getCode()).body(error);
+        return buildException(HttpStatus.CONFLICT.value(), e.getMessage() != null ? e.getMessage() : "Entity Already Exist");
+    }
+
+    @ExceptionHandler({NotEnoughProductException.class})
+    public ResponseEntity handleNotEnoughProductException(RuntimeException e) {
+        return buildException(HttpStatus.CONFLICT.value(), e.getMessage() != null ? e.getMessage() : "Entity Already Exist");
     }
 
     @ExceptionHandler({UnsupportedOperationException.class})
     public ResponseEntity handleUnsupportedOperationException(RuntimeException e) {
-        var error = ErrorResponse.builder().code(HttpStatus.NOT_FOUND.value()).message(e.getMessage() != null ? e.getMessage() : "Function Not Yet Implemented. Please Comeback Later").build();
-        System.out.println(error);
-        return ResponseEntity.status(error.getCode()).body(error);
+        return buildException(HttpStatus.NOT_IMPLEMENTED.value(), e.getMessage() != null ? e.getMessage() : "Function Not Yet Implemented. Please Comeback Later");
     }
 
 }

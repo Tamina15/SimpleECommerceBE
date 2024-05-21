@@ -6,15 +6,19 @@ package rookiesspring.controller;
 
 import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.OrderDTO;
+import rookiesspring.dto.update.OrderUpdateDTO;
 import rookiesspring.service.OrderService;
+import rookiesspring.util.Util;
 
 /**
  *
@@ -54,5 +58,33 @@ public class OrderController {
     @PostMapping("/")
     public ResponseEntity createOrder(@RequestBody OrderDTO order) {
         return ResponseEntity.ok(service.save(order));
+    }
+
+    /**
+     * Change to process order, todo: check product amount, subtract product
+     * amount, set processed = true
+     *
+     * @param id
+     * @return
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity processOrder(@PathVariable("id") long id) {
+        return ResponseEntity.ok().body(service.proccessOrder(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteOrder(@PathVariable("id") long id) {
+        service.delete(id);
+        return ResponseEntity.ok().body(Util.message("Delete Succesfully"));
+    }
+
+    @PostMapping("/product")
+    public ResponseEntity addProduct(@RequestBody OrderUpdateDTO dto) {
+        return ResponseEntity.ok(service.addProduct(dto));
+    }
+
+    @DeleteMapping("/product")
+    public ResponseEntity deleteProduct(@RequestBody OrderUpdateDTO dto) {
+        return ResponseEntity.ok(service.deleteProduct(dto));
     }
 }
