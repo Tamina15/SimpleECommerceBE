@@ -185,15 +185,15 @@ insert into product_category (product_id,  category_id) values (9, 9);
 -- insert into product_category (product_id,  category_id, deleted) values (9, 9, false);
 
 -- 9
-insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (1, 234000, now(), now(), false);
-insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (2, 567000, now(), now(), false);
-insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (3, 567564, now(), now(), false);
-insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (3, 325346, now(), now(), false);
-insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (2, 5567565, now(), now(), false);
-insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (4, 75642233, now(), now(), false);
-insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (5, 265553.344, now(), now(), false);
-insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (1, 5756545.564, now(), now(), false);
-insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (6, 2322354656, now(), now(), false);
+insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (1, 0, now(), now(), false);
+insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (2, 0, now(), now(), false);
+insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (3, 0, now(), now(), false);
+insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (3, 0, now(), now(), false);
+insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (2, 0, now(), now(), false);
+insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (4, 0, now(), now(), false);
+insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (5, 0, now(), now(), false);
+insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (1, 0, now(), now(), false);
+insert into "order" (user_id, total_price, created_at, updated_at, deleted) values (6, 0, now(), now(), false);
 
 -- Not use, total_price will be generate by code
 -- INSERT INTO public."order" (id, user_id, total_price, created_at, updated_at, deleted) values (1, 1, 49130000, '2024-05-16 10:10:20.730', '2024-05-16 10:10:23.457', false);
@@ -208,9 +208,9 @@ insert into "order" (user_id, total_price, created_at, updated_at, deleted) valu
 
 -- 24
 insert into order_detail (order_id, product_id, amount) values (1, 1, 1);
-insert into order_detail (order_id, product_id, amount) values (1, 45, 43);
-insert into order_detail (order_id, product_id, amount) values (1, 30, 10);
-insert into order_detail (order_id, product_id, amount) values (1, 4, 47);
+insert into order_detail (order_id, product_id, amount) values (1, 2, 2);
+insert into order_detail (order_id, product_id, amount) values (1, 3, 1);
+insert into order_detail (order_id, product_id, amount) values (1, 4, 4);
 insert into order_detail (order_id, product_id, amount) values (2, 37, 38);
 insert into order_detail (order_id, product_id, amount) values (2, 96, 12);
 insert into order_detail (order_id, product_id, amount) values (2, 27, 42);
