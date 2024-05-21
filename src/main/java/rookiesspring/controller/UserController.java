@@ -4,8 +4,6 @@
  */
 package rookiesspring.controller;
 
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,11 +13,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import rookiesspring.dto.CartDTO;
 import rookiesspring.dto.UserDTO;
-import rookiesspring.model.User;
+import rookiesspring.dto.update.UserUpdateDTO;
 import rookiesspring.service.UserService;
+import rookiesspring.util.ResponseObject;
+import rookiesspring.util.Util;
 
 /**
  *
@@ -38,18 +38,13 @@ public class UserController {
     }
 
     @GetMapping({"", "/", "/all"})
-    public ResponseEntity getAllUsers() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity getAllUsers(@RequestParam(value = "username", required = false) String username) {
+        return ResponseEntity.ok(service.findAllByUsername(username));
     }
 
     @GetMapping("/full")
-    public ResponseEntity getAllUsersFull() {
-        return ResponseEntity.ok(service.findAllFull());
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity getAllUserByName(@RequestParam("username") String username) {
-        return ResponseEntity.ok(service.findAllByUsername(username));
+    public ResponseEntity getAllUsersFull(@RequestParam(value = "username", required = false) String username) {
+        return ResponseEntity.ok(service.findAllFull(username));
     }
 
     @GetMapping("/full/{id}")
@@ -62,28 +57,25 @@ public class UserController {
         return ResponseEntity.ok(service.findById(userId));
     }
 
-    @PostMapping("/new")
+    @PostMapping({"", "/"})
     public ResponseEntity createUser(@RequestBody UserDTO newUser) {
         return ResponseEntity.ok(service.save(newUser));
     }
 
-    @PutMapping("/change-infomation")
-    public ResponseEntity changeUserInfomation(@RequestBody User oldUser) {
-        if (service.checkExist(oldUser.getId())) {
-            return ResponseEntity.ok(service.updateOne(oldUser));
-        } else {
-            throw new EntityNotFoundException("No value present");
-        }
+    @PutMapping({"", "/"})
+    public ResponseEntity changeUserInfomation(@RequestBody UserUpdateDTO user_dto) {
+        return ResponseEntity.ok(service.updateOne(user_dto));
     }
 
-    @DeleteMapping("/delete")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public ResponseEntity DeleteUser(@RequestParam("id") long id) {
-        if (service.checkExist(id)) {
-            service.deleteById(id);
-            return ResponseEntity.accepted().body("Delete Successfully");
-        } else {
-            throw new EntityNotFoundException("No value present");
-        }
+    @DeleteMapping("/{id}")
+    public ResponseEntity DeleteUser(@PathVariable(value = "id") Long id) {
+        service.deleteById(id);
+        return ResponseEntity.accepted().body(Util.message("Delete Successfully"));
     }
+    
+    }
+    
+    
+    
+    
 }

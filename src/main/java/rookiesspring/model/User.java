@@ -32,7 +32,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Getter
 @Setter
 @Table(name = "`user`")
-@SQLDelete(sql = "UPDATE 'user' SET deleted = true WHERE id=?")
+@SQLDelete(sql = "UPDATE \"user\" SET deleted = true WHERE id=?")
 @SQLRestriction(value = "deleted=false")
 public class User extends AuditEntity<Long> {
 
@@ -52,7 +52,7 @@ public class User extends AuditEntity<Long> {
     @JsonManagedReference()
     private List<Rate> rates;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @PrimaryKeyJoinColumn
     UserDetail user_detail;
 
