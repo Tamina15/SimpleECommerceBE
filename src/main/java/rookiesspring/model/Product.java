@@ -109,4 +109,8 @@ public class Product extends AuditEntity<Long> {
         return Objects.equals(getId(), other.getId());
     }
 
+    public void reduceAmount(int amount) {
+        this.amount -= amount;
+    }
+
 }

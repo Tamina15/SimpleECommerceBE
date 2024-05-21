@@ -4,6 +4,7 @@
  */
 package rookiesspring.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.CartDTO;
 import rookiesspring.dto.UserDTO;
 import rookiesspring.dto.update.UserUpdateDTO;
+import rookiesspring.service.CartService;
 import rookiesspring.service.UserService;
-import rookiesspring.util.ResponseObject;
 import rookiesspring.util.Util;
 
 /**
@@ -32,9 +33,11 @@ import rookiesspring.util.Util;
 public class UserController {
 
     private UserService service;
+    private CartService cartService;
 
-    public UserController(UserService service) {
+    public UserController(UserService service, CartService cartService) {
         this.service = service;
+        this.cartService = cartService;
     }
 
     @GetMapping({"", "/", "/all"})
@@ -59,7 +62,7 @@ public class UserController {
 
     @PostMapping({"", "/"})
     public ResponseEntity createUser(@RequestBody UserDTO newUser) {
-        return ResponseEntity.ok(service.save(newUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.save(newUser));
     }
 
     @PutMapping({"", "/"})
@@ -72,10 +75,21 @@ public class UserController {
         service.deleteById(id);
         return ResponseEntity.accepted().body(Util.message("Delete Successfully"));
     }
-    
+
+    // cart
+    @PutMapping("/cart")
+    public ResponseEntity addToCart(@RequestBody() CartDTO cart) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(cartService.addToCart(cart));
     }
-    
-    
-    
-    
+
+    @DeleteMapping("/cart")
+    public ResponseEntity removefromCart(@RequestBody() CartDTO cart) {
+        return ResponseEntity.accepted().body(cartService.removefromCart(cart));
+    }
+
+    @PostMapping("/cart/{id}")
+    public ResponseEntity buy(@PathVariable(value = "id") Long user_id) {
+        return ResponseEntity.status(HttpStatus.OK).body(cartService.buy(user_id));
+    }
+
 }
