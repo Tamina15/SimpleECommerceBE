@@ -14,5 +14,10 @@ import java.time.LocalDateTime;
 public class Util {
 
     public static LocalDateTime minDateTime = LocalDateTime.of(0, 1, 1, 0, 0, 0, 0);
-
+    public static ResponseObject message(String message){
+        return new ResponseObject(message);
+    }
+}
+record ResponseObject(String message){
+    
 }
