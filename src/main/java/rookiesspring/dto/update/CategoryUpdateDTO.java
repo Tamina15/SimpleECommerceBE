@@ -4,10 +4,12 @@
  */
 package rookiesspring.dto.update;
 
+import jakarta.validation.constraints.NotNull;
+
 /**
  *
  * @author HP
  */
-public record CategoryUpdateDTO(long id, String name, String description) {
+public record CategoryUpdateDTO(@NotNull(message = "Category Id must not be null")long id, String name, String description) {
 
 }

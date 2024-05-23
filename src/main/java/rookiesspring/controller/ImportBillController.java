@@ -24,7 +24,7 @@ import rookiesspring.service.ImportBillService;
  * @author Tamina
  */
 @RestController
-@RequestMapping("/import-bill")
+@RequestMapping("api/v1/import-bills")
 @NoArgsConstructor
 public class ImportBillController {
 

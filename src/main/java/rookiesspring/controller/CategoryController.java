@@ -5,6 +5,7 @@
 package rookiesspring.controller;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +28,7 @@ import rookiesspring.util.Util;
  * @author Tamina
  */
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/api/v1/categories")
 public class CategoryController {
 
     CategoryService service;
@@ -82,16 +83,16 @@ public class CategoryController {
     }
 
     @PutMapping("/")
-    public ResponseEntity updateCategory(@RequestBody() CategoryUpdateDTO category) {
+    public ResponseEntity updateCategory(@Valid @RequestBody() CategoryUpdateDTO category) {
         return ResponseEntity.ok(service.update(category));
     }
 
-    @PostMapping("/product")
+    @PostMapping("/products")
     public ResponseEntity addProduct(@RequestBody() CD_ID id) {
         return ResponseEntity.ok(service.addProduct(id.category_id(), id.product_ids()));
     }
 
-    @DeleteMapping("/product")
+    @DeleteMapping("/products")
     public ResponseEntity removeProduct(@RequestBody() CD_ID id) {
         return ResponseEntity.ok(service.removeProduct(id.category_id(), id.product_ids()));
     }

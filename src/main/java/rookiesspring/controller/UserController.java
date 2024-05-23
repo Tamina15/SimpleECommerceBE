@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.CartDTO;
 import rookiesspring.dto.UserDTO;
+import rookiesspring.dto.response.OrderResponseDTO;
 import rookiesspring.dto.update.UserUpdateDTO;
 import rookiesspring.service.CartService;
 import rookiesspring.service.UserService;
@@ -28,7 +29,7 @@ import rookiesspring.util.Util;
  * @author Tamina
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/v1/users")
 
 public class UserController {
 
@@ -77,17 +78,17 @@ public class UserController {
     }
 
     // cart
-    @PutMapping("/cart")
+    @PutMapping("/carts")
     public ResponseEntity addToCart(@RequestBody() CartDTO cart) {
         return ResponseEntity.status(HttpStatus.CREATED).body(cartService.addToCart(cart));
     }
 
-    @DeleteMapping("/cart")
+    @DeleteMapping("/carts")
     public ResponseEntity removefromCart(@RequestBody() CartDTO cart) {
         return ResponseEntity.accepted().body(cartService.removefromCart(cart));
     }
 
-    @PostMapping("/cart/{id}")
+    @PostMapping("/carts/{id}")
     public ResponseEntity buy(@PathVariable(value = "id") Long user_id) {
         return ResponseEntity.status(HttpStatus.OK).body(cartService.buy(user_id));
     }

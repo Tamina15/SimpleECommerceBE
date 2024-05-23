@@ -4,6 +4,7 @@
  */
 package rookiesspring.controller;
 
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +27,7 @@ import rookiesspring.util.Util;
  * @author Tamina
  */
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/api/v1/orders")
 public class OrderController {
 
     OrderService service;
@@ -56,7 +57,7 @@ public class OrderController {
     }
 
     @PostMapping("/")
-    public ResponseEntity createOrder(@RequestBody OrderDTO order) {
+    public ResponseEntity createOrder(@Valid @RequestBody OrderDTO order) {
         return ResponseEntity.ok(service.save(order));
     }
 
@@ -78,12 +79,12 @@ public class OrderController {
         return ResponseEntity.ok().body(Util.message("Delete Succesfully"));
     }
 
-    @PostMapping("/product")
+    @PostMapping("/products")
     public ResponseEntity addProduct(@RequestBody OrderUpdateDTO dto) {
         return ResponseEntity.ok(service.addProduct(dto));
     }
 
-    @DeleteMapping("/product")
+    @DeleteMapping("/products")
     public ResponseEntity deleteProduct(@RequestBody OrderUpdateDTO dto) {
         return ResponseEntity.ok(service.deleteProduct(dto));
     }
