@@ -105,7 +105,19 @@ public class ProductController {
 
     @PostMapping("/add-image")
     public void AddImage() {
+    @PostMapping("/images/upload")
+    public ResponseEntity UploadImage(@Valid UploadImageDTO uploadImageDTO) {
+        return imageService.uploadImage(uploadImageDTO);
+    }
 
+//    @PostMapping(value = "/images/upload2", consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+    @PostMapping(value = "/images/upload2")
+    public ResponseEntity UploadImage2(ProductDTO_1 productDTO) {
+        System.out.println(productDTO.toString());
+        System.out.println(Arrays.toString(productDTO.category_id));
+        System.out.println(Arrays.toString(productDTO.pa));
+        return ResponseEntity.ok().body("Remove Image Successfully");
+//        return imageService.uploadImage(productDTO);
     }
 
 }
