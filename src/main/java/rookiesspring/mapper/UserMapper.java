@@ -48,7 +48,7 @@ public class UserMapper implements BaseMapper<User, UserDTO, UserResponseDTO> {
     @Override
     public UserResponseDTO ToResponseDTO(User e) {
         UserDetail d = e.getUser_detail();
-        UserResponseDTO u = new UserResponseDTO(e.getId(), e.getUsername(), e.getEmail(), d.isGender(), d.getAge(), d.getPhone(), e.getOrders(), d.getAddress());
+        UserResponseDTO u = new UserResponseDTO(e.getId(), e.getUserName(), e.getEmail(), d.isGender(), d.getAge(), d.getPhone(), e.getOrders(), d.getAddress(), e.getRoles());
         return u;
     }
 
@@ -63,7 +63,7 @@ public class UserMapper implements BaseMapper<User, UserDTO, UserResponseDTO> {
     }
 
     public UserResponseDTOShort ToResponseDTOShort(User e) {
-        UserResponseDTOShort u = new UserResponseDTOShort(e.getId(), e.getUsername(), e.getEmail());
+        UserResponseDTOShort u = new UserResponseDTOShort(e.getId(), e.getUserName(), e.getEmail(), e.getRoles());
         return u;
     }
 }

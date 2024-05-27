@@ -65,5 +65,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity handleValidationExceptions(MethodArgumentNotValidException e) {
         return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getBindingResult().getAllErrors().get(0).getDefaultMessage()) : "Invalid Parameter");
     }
+    
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity handleBadRequestExceptions(BadRequestException e) {
+        return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getStackTrace()[0].toString()) : "Bad Request");
+    }
+    
 
 }

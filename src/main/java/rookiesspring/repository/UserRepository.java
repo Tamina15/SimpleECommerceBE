@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.userdetails.UserDetails;
 import rookiesspring.dto.response.custom.UserResponseDTOShort;
 import rookiesspring.model.User;
 
@@ -20,7 +21,7 @@ import rookiesspring.model.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "select u from User u left join fetch u.orders left join fetch u.user_detail where (LOWER(u.username) LIKE concat('%', LOWER(:username), '%')) ")
-    List<User> findAll(@Param(value = "username")String username);
+    List<User> findAll(@Param(value = "username") String username);
 
     @Override
     @Query(value = "select u from User u left join fetch u.orders left join fetch u.user_detail")
@@ -35,4 +36,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     public List<UserResponseDTOShort> findAllProjectedByUsernameContainsIgnoreCase(String username);
 
     public boolean existsByEmail(String email);
+
+    public boolean existsByUsername(String username);
+
+    public Optional<User> findByUsername(String username);
+
+    public Optional<User> findByEmail(String email);
+    public Optional<UserResponseDTOShort> findProjectedByEmail(String email);
 }

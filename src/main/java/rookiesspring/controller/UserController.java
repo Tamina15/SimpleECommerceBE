@@ -6,6 +6,7 @@ package rookiesspring.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.CartDTO;
 import rookiesspring.dto.UserDTO;
-import rookiesspring.dto.response.OrderResponseDTO;
 import rookiesspring.dto.update.UserUpdateDTO;
+import rookiesspring.model.User;
 import rookiesspring.service.CartService;
 import rookiesspring.service.UserService;
 import rookiesspring.util.Util;
@@ -53,6 +54,11 @@ public class UserController {
 
     @GetMapping("/full/{id}")
     public ResponseEntity getUserFull(@PathVariable(value = "id") Long userId) {
+        return ResponseEntity.ok(service.findByIdFull(userId));
+    }
+    @GetMapping("/info")
+    public ResponseEntity getUserInfomation(Authentication auth) {
+        long userId = (Long) auth.getPrincipal();
         return ResponseEntity.ok(service.findByIdFull(userId));
     }
 

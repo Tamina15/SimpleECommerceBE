@@ -11,13 +11,10 @@ import jakarta.validation.constraints.NotBlank;
  * @author HP
  * @author Tamina
  */
-public record UserDTO(
-        @NotBlank(message = "Username cannot be blank")
-        String username,
+public record LoginDTO(
         @NotBlank(message = "Email cannot be blank")
         String email,
         @NotBlank(message = "Password cannot be blank")
-        String password,
-        String firstname, String lastname, boolean gender, int age, String phone, String address_number, String street, String ward, String district, String city, String province, String country) {
+        String password) {
 
 }

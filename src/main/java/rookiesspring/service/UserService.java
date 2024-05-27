@@ -72,30 +72,26 @@ public class UserService implements UserServiceInterface {
             throw new EntityExistsException();
         }
     }
-// doing
 
     public UserResponseDTOShort updateOne(UserUpdateDTO user_dto) {
-        if (checkExist(user_dto.id())) {
-            User u = repository.getReferenceById(user_dto.id());
-            if (user_dto.email() != null) {
-                if (checkExistEmail(user_dto.email())) {
-                    throw new EntityExistsException("Email has already Exists");
-                }
 
+        User u = repository.findById(user_dto.id()).orElseThrow(() -> new EntityNotFoundException("No value present"));
+        if (user_dto.email() != null) {
+            if (checkExistEmail(user_dto.email())) {
+                throw new EntityExistsException("Email has already Existed");
             }
-            Address address = new Address();
-            updateMapper.updateUserAddressFromDto(user_dto, address);
-            UserDetail detail = new UserDetail();
-            updateMapper.updateUserDetailFromDto(user_dto, detail);
-            updateMapper.updateUserFromDto(user_dto, u);
-            detail.setAddress(address);
-            u.setUser_detail(detail);
-
-            repository.save(u);
-            return mapper.ToResponseDTOShort(u);
-        } else {
-            throw new EntityNotFoundException("No value present");
         }
+        Address address = u.getUser_detail().getAddress();
+        updateMapper.updateUserAddressFromDto(user_dto, address);
+        UserDetail detail = u.getUser_detail();
+        updateMapper.updateUserDetailFromDto(user_dto, detail);
+        updateMapper.updateUserFromDto(user_dto, u);
+        detail.setAddress(address);
+        u.setUser_detail(detail);
+
+        repository.save(u);
+        return mapper.ToResponseDTOShort(u);
+
     }
 
     public void deleteById(long id) {

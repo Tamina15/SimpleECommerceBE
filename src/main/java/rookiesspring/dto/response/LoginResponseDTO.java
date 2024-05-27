@@ -5,17 +5,11 @@
 
 package rookiesspring.dto.response;
 
-import java.util.List;
-import java.util.Set;
-import rookiesspring.model.Address;
-import rookiesspring.model.Order;
-
 /**
  *
  * @author HP
  * @author Tamina
  */
 
-public record UserResponseDTO(long id, String username, String email, boolean gender, int age, String phone, List<Order> orders, Address address, Set<String> roles) {
-
+public record LoginResponseDTO(String token, long expiresIn) {
 }
