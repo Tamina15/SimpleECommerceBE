@@ -21,10 +21,11 @@ import rookiesspring.model.Product;
  * @author HP
  * @author Tamina
  */
-@Entity
+//@Entity
 @NoArgsConstructor
 @Getter
 @Setter
+@Deprecated
 public class Product_Category {
 
     @EmbeddedId

@@ -21,6 +21,7 @@ import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import rookiesspring.model.composite_model.ProductCategory;
 
 /**
  *
@@ -32,7 +33,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Setter
 @ToString
 @SQLDelete(sql = "UPDATE product SET deleted = true WHERE id=?")
-@SQLRestriction(value = "deleted=false")
+//@SQLRestriction(value = "deleted=false")
 public class Product extends AuditEntity<Long> {
 
     private String name;
@@ -48,14 +49,18 @@ public class Product extends AuditEntity<Long> {
     @ColumnDefault(value = "'none'")
     private String rating;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinTable(name = "product_category",
-            joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
+//    @ManyToMany()
+//    @JoinTable(name = "product_category",
+//            joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
+//            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
+//    @JsonManagedReference()
+//    private Set<Category> category;
+    
+    @OneToMany(mappedBy = "product")
     @JsonManagedReference()
-    private Set<Category> category;
+    private Set<ProductCategory> category;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonManagedReference()
     private Set<Image> images;
 
@@ -72,7 +77,10 @@ public class Product extends AuditEntity<Long> {
     }
 
     public boolean addCategory(Category c) {
-        return category.add(c);
+        return category.add(new ProductCategory(this, c));
+    }
+    public boolean addCategory(ProductCategory pc) {
+        return category.add(pc);
     }
 
     public boolean addImage(Image i) {
@@ -80,7 +88,7 @@ public class Product extends AuditEntity<Long> {
     }
 
     public boolean removeCategory(Category c) {
-        return category.remove(c);
+        return category.remove(new ProductCategory(this, c));
     }
 
     public boolean removeImage(Image i) {

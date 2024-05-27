@@ -7,14 +7,15 @@ package rookiesspring.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
+import rookiesspring.model.composite_model.ProductCategory;
 
 /**
  *
@@ -25,23 +26,27 @@ import org.hibernate.annotations.SQLRestriction;
 @Getter
 @Setter
 @SQLDelete(sql = "UPDATE category SET deleted = true WHERE id=?")
-@SQLRestriction(value = "deleted=false")
+//@SQLRestriction(value = "deleted=false")
 public class Category extends AuditEntity<Long> {
 
     private String name;
     private String description;
 
-    @ManyToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+//    @ManyToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+//    @JsonBackReference
+//    private Set<Product> products;
+
+    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JsonBackReference
-    private Set<Product> products;
+    private Set<ProductCategory> products = new HashSet<>();
 
-    public void addProduct(Product p) {
-        products.add(p);
-    }
-
-    public void removeProduct(Product p) {
-        products.remove(p);
-    }
+//    public void addProduct(Product p) {
+//        products.add(p);
+//    }
+//
+//    public void removeProduct(Product p) {
+//        products.remove(p);
+//    }
 
     @Override
     public String toString() {

@@ -22,6 +22,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode
+@Deprecated
 public class Product_Category_Key {
 
     @Column()

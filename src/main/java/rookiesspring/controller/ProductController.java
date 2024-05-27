@@ -85,27 +85,30 @@ public class ProductController {
 
     @PostMapping("/categories")
     public ResponseEntity addCategories(@RequestParam("product_id") long product_id, @RequestParam("category_id") long[] category_id) {
-        service.addCategories(product_id, category_id);
-        return ResponseEntity.ok().body("Add Category Successfully");
+        return ResponseEntity.ok().body(service.addCategories(product_id, category_id));
+//        service.addCategories(product_id, category_id);
+//        return ResponseEntity.ok().body("Add Category Successfully");
     }
 
     @PostMapping("/images/")
     public ResponseEntity addImages(@RequestBody() AddImageDTO add_image) {
-        service.addImages(add_image.product_id(), add_image.images());
-        return ResponseEntity.ok().body("Add Image Successfully");
+//        service.addImages(add_image.product_id(), add_image.images());
+//        return ResponseEntity.ok().body("Add Image Successfully");
+        return ResponseEntity.ok().body(service.addImages(add_image.product_id(), add_image.images()));
     }
 
     @DeleteMapping("/categories")
     public ResponseEntity removeCategories(@RequestParam("product_id") long product_id, @RequestParam("category_id") long[] category_id) {
-        service.removeCategories(product_id, category_id);
-        return ResponseEntity.ok().body("Remove Category Successfully");
+//        service.removeCategories(product_id, category_id);
+//        return ResponseEntity.ok().body("Remove Category Successfully");
+        return ResponseEntity.ok().body(service.removeCategories(product_id, category_id));
     }
 
     @DeleteMapping("/images/")
     public ResponseEntity removeImages(@RequestBody() RemoveImageDTO remove_image) {
-        System.out.println(Arrays.toString(remove_image.image_id()));
-        service.removeImages(remove_image.product_id(), remove_image.image_id());
-        return ResponseEntity.ok().body("Remove Image Successfully");
+//        service.removeImages(remove_image.product_id(), remove_image.image_id());
+//        return ResponseEntity.ok().body("Remove Image Successfully");
+        return ResponseEntity.ok().body(service.removeImages(remove_image.product_id(), remove_image.image_id()));
     }
 
     @DeleteMapping("/{id}")

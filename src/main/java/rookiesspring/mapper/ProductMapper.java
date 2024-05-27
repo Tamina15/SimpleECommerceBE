@@ -11,8 +11,12 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import rookiesspring.dto.ProductDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
+import rookiesspring.dto.response.custom.CategoryResponseDTOShort;
 import rookiesspring.dto.response.custom.ProductResponseDTOShort;
+import rookiesspring.model.Category;
 import rookiesspring.model.Product;
+import rookiesspring.model.composite_model.ProductCategory;
+import static springfox.documentation.schema.property.BeanPropertyDefinitions.name;
 
 /**
  *
@@ -40,7 +44,14 @@ public class ProductMapper implements BaseMapper<Product, ProductDTO, ProductRes
 
     @Override
     public ProductResponseDTO ToResponseDTO(Product product) {
-        ProductResponseDTO product_dto = new ProductResponseDTO(product.getId(), product.getName(), product.getPrice(), product.getAmount(), product.getRating(), product.getCategory(), product.getImages());
+//        ProductResponseDTO product_dto = new ProductResponseDTO(product.getId(), product.getName(), product.getPrice(), product.getAmount(), product.getRating(), product.getCategory(), product.getImages());
+        Set<ProductCategory> pc = product.getCategory();
+        Set<CategoryResponseDTOShort> set = new HashSet<>();
+        for (ProductCategory a : pc) {
+            Category c = a.getCategory();
+            set.add(new CategoryResponseDTOShort(c.getId(), c.getName(), c.getDescription()));
+        }
+        ProductResponseDTO product_dto = new ProductResponseDTO(product.getId(), product.getName(), product.getPrice(), product.getAmount(), product.getRating(), set, product.getImages());
         return product_dto;
     }
 

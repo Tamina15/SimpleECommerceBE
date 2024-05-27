@@ -5,7 +5,10 @@
 package rookiesspring.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rookiesspring.dto.CategoryDTO;
@@ -15,7 +18,9 @@ import rookiesspring.dto.update.CategoryUpdateDTO;
 import rookiesspring.mapper.CategoryMapper;
 import rookiesspring.model.Category;
 import rookiesspring.model.Product;
+import rookiesspring.model.composite_model.ProductCategory;
 import rookiesspring.repository.CategoryRepository;
+import rookiesspring.repository.ProductCategoryRepository;
 import rookiesspring.repository.ProductRepository;
 import rookiesspring.service.interfaces.CategoryServiceInterface;
 
@@ -31,6 +36,8 @@ public class CategoryService implements CategoryServiceInterface {
     CategoryRepository repository;
     CategoryMapper mapper;
     ProductRepository productRepository;
+    @Autowired
+    ProductCategoryRepository productcategoryRepository;
 
     public CategoryService(CategoryRepository repository, CategoryMapper mapper) {
         this.repository = repository;
@@ -55,11 +62,18 @@ public class CategoryService implements CategoryServiceInterface {
 
     public CategoryResponseDTO save(CategoryDTO categoryDTO) {
         Category c = mapper.toEntity(categoryDTO);
-        c = repository.save(c);
+        repository.save(c);
+        Set<ProductCategory> set = new HashSet<>();
         if (categoryDTO.product_id() != null) {
-            addProduct(c.getId(), categoryDTO.product_id());
+            for (long id : categoryDTO.product_id()) {
+                Product product = productRepository.getReferenceById(id);
+                ProductCategory productCategory = new ProductCategory(product, c);
+                set.add(productCategory);
+                productcategoryRepository.save(productCategory);
+            }
         }
-        return mapper.ToResponseDTO(c);
+        c.setProducts(set);
+        return mapper.ToResponseDTO(repository.findById(c.getId()).get());
     }
 
     public CategoryResponseDTOShort update(CategoryUpdateDTO categoryDTO) {
@@ -77,9 +91,6 @@ public class CategoryService implements CategoryServiceInterface {
     public boolean delete(long id) {
         if (checkExist(id)) {
             Category c = repository.getReferenceById(id);
-            for(Product p : c.getProducts()){
-                p.removeCategory(c);
-            }
             repository.deleteById(id);
             return true;
         }
@@ -87,24 +98,34 @@ public class CategoryService implements CategoryServiceInterface {
     }
 
     public CategoryResponseDTO addProduct(long category_id, long[] product_ids) {
-        Category c = repository.getReferenceById(category_id);
-        for (long id : product_ids) {
-            Product p = productRepository.getReferenceById(id);
-            p.addCategory(c);
-            c.addProduct(p);
+        if (repository.existsById(category_id)) {
+            Category category = repository.getReferenceById(category_id);
+            for (long id : product_ids) {
+                if (productRepository.existsById(id)) {
+                    System.out.println(id);
+                    Product product = productRepository.getReferenceById(id);
+                    ProductCategory product_category = new ProductCategory(product, category);
+                    productcategoryRepository.save(product_category);
+                }
+            }
+            return mapper.ToResponseDTO(repository.findById(category_id).get());
+        } else {
+            throw new EntityNotFoundException();
         }
-        repository.save(c);
-        return mapper.ToResponseDTO(c);
     }
 
+    @Transactional(rollbackOn = RuntimeException.class)
     public CategoryResponseDTO removeProduct(long category_id, long[] product_ids) {
-        Category c = repository.getReferenceById(category_id);
-        for (long id : product_ids) {
-            Product p = productRepository.getReferenceById(id);
-            p.removeCategory(c);
+        if (repository.existsById(category_id)) {
+            for (long id : product_ids) {
+                if (productRepository.existsById(id)) {
+                    productcategoryRepository.deleteByProductAndCategory(id, category_id);
+                }
+            }
+            return mapper.ToResponseDTO(repository.findById(category_id).get());
+        } else {
+            throw new EntityNotFoundException();
         }
-        c = repository.save(c);
-        return mapper.ToResponseDTO(c);
     }
 
     @Override

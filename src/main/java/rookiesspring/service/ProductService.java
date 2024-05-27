@@ -4,12 +4,11 @@
  */
 package rookiesspring.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import rookiesspring.dto.ImageDTO;
 import rookiesspring.dto.ProductDTO;
@@ -22,9 +21,10 @@ import rookiesspring.mapper.ProductMapper;
 import rookiesspring.model.Category;
 import rookiesspring.model.Image;
 import rookiesspring.model.Product;
-import rookiesspring.model.Rate;
+import rookiesspring.model.composite_model.ProductCategory;
 import rookiesspring.repository.CategoryRepository;
 import rookiesspring.repository.ImageRepository;
+import rookiesspring.repository.ProductCategoryRepository;
 import rookiesspring.repository.ProductRepository;
 import rookiesspring.repository.RateRepository;
 import rookiesspring.service.interfaces.ProductServiceInterface;
@@ -46,6 +46,8 @@ public class ProductService implements ProductServiceInterface {
     ImageMapper imageMapper;
     @Autowired
     ImageRepository imageRepository;
+    @Autowired
+    ProductCategoryRepository productCategoryRepository;
 
     public ProductService(ProductRepository repository, ProductMapper mapper) {
         this.repository = repository;
@@ -94,36 +96,45 @@ public class ProductService implements ProductServiceInterface {
 // done
     public ProductResponseDTO save(ProductDTO product_dto) {
         Product p = mapper.toEntity(product_dto);
+        p = repository.save(p);
         if (product_dto.category_id() != null) {
             for (long id : product_dto.category_id()) {
                 Category c = categoryRepository.getReferenceById(id);
-                p.addCategory(c);
+                ProductCategory pc = new ProductCategory(p, c);
+                productCategoryRepository.save(pc);
+                p.addCategory(pc);
             }
         }
         if (product_dto.images() != null) {
             for (ImageDTO i : product_dto.images()) {
                 Image image = imageMapper.toEntity(i);
                 image.setProduct(p);
+//                image = imageRepository.save(image);
                 p.addImage(image);
             }
         }
-        p = repository.save(p);
+        repository.save(p);
         return mapper.ToResponseDTO(p);
     }
 
 //done
-    public void addCategories(long product_id, long[] category_id) {
-        Product p = repository.getReferenceById(product_id);
-        for (long id : category_id) {
-            if (categoryRepository.existsById(id)) {
-                Category c = categoryRepository.getReferenceById(id);
-                p.addCategory(c);
+    public ProductResponseDTO addCategories(long product_id, long[] category_id) {
+        Product product = repository.getReferenceById(product_id);
+        if (checkExist(product_id)) {
+            for (long id : category_id) {
+                if (categoryRepository.existsById(id) && !productCategoryRepository.existsByProductIdAndCategoryId(product_id, id)) {
+                    Category category = categoryRepository.getReferenceById(id);
+                    ProductCategory productCategory = new ProductCategory(product, category);
+                    productCategoryRepository.save(productCategory);
+                }
             }
-            repository.save(p);
+        } else {
+            throw new EntityNotFoundException();
         }
+        return mapper.ToResponseDTO(product);
     }
 
-    public void addImages(long product_id, ImageDTO[] images) {
+    public ProductResponseDTO addImages(long product_id, ImageDTO[] images) {
         Product p = repository.getReferenceById(product_id);
         if (images.length != 0) {
             for (ImageDTO i : images) {
@@ -135,29 +146,33 @@ public class ProductService implements ProductServiceInterface {
             }
             repository.save(p);
         }
+        return mapper.ToResponseDTO(p);
     }
 
-    public void removeCategories(long product_id, long[] category_id) {
-        Product p = repository.getReferenceById(product_id);
+    @Transactional(rollbackOn = {RuntimeException.class})
+    public ProductResponseDTO removeCategories(long product_id, long[] category_id) {
         if (category_id.length != 0) {
             for (long id : category_id) {
-                Category c = categoryRepository.getReferenceById(id);
-                p.removeCategory(c);
+                System.out.println(id);
+                productCategoryRepository.deleteByProductIdAndCategoryId(product_id, id);
+                
             }
-            repository.save(p);
         }
+        productCategoryRepository.flush();
+        return mapper.ToResponseDTO(repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException()));
     }
 
-    public void removeImages(long product_id, long[] images_id) {
-        Product p = repository.getReferenceById(product_id);
+    @Transactional(rollbackOn = {RuntimeException.class})
+    public ProductResponseDTO removeImages(long product_id, long[] images_id) {
+        Product p = repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException());
         if (images_id.length != 0) {
             for (long id : images_id) {
                 Image i = imageRepository.getReferenceById(id);
-                System.out.println(i.getId());
                 p.removeImage(i);
+                imageRepository.delete(i);
             }
-            repository.save(p);
         }
+        return mapper.ToResponseDTO(p);
     }
 
     public ProductResponseDTO update(ProductUpdateDTO product_dto) {
