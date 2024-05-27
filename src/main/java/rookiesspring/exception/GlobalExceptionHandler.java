@@ -4,6 +4,7 @@
  */
 package rookiesspring.exception;
 
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.logging.Level;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import rookiesspring.util.Util;
 
 /**
@@ -71,5 +71,9 @@ public class GlobalExceptionHandler {
         return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getStackTrace()[0].toString()) : "Bad Request");
     }
     
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity handleMalformedJwtExceptions(MalformedJwtException e) {
+        return buildException(HttpStatus.FORBIDDEN.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getMessage()) : "Malformed JWT Token");
+    }
 
 }

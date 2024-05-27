@@ -8,8 +8,10 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import rookiesspring.dto.CartDTO;
 import rookiesspring.dto.UserDTO;
 import rookiesspring.dto.response.UserResponseDTO;
 import rookiesspring.dto.response.custom.UserResponseDTOShort;
@@ -17,10 +19,8 @@ import rookiesspring.dto.update.UserUpdateDTO;
 import rookiesspring.mapper.UserMapper;
 import rookiesspring.mapper.UserUpdateMapper;
 import rookiesspring.model.Address;
-import rookiesspring.model.Cart;
 import rookiesspring.model.User;
 import rookiesspring.model.UserDetail;
-import rookiesspring.repository.CartRepository;
 import rookiesspring.repository.UserRepository;
 import rookiesspring.service.interfaces.UserServiceInterface;
 
@@ -30,7 +30,7 @@ import rookiesspring.service.interfaces.UserServiceInterface;
  * @author Tamina
  */
 @Service
-public class UserService implements UserServiceInterface {
+public class UserService implements UserServiceInterface, UserDetailsService {
 
     private UserRepository repository;
     private UserMapper mapper;
@@ -64,6 +64,7 @@ public class UserService implements UserServiceInterface {
         return mapper.ToResponseDTO(repository.findById(userId).orElseThrow(() -> new EntityNotFoundException()));
     }
 
+    @Deprecated
     public UserResponseDTO save(UserDTO newUser) {
         User u = mapper.toEntity(newUser);
         try {
@@ -109,5 +110,14 @@ public class UserService implements UserServiceInterface {
 
     public boolean checkExistEmail(String email) {
         return repository.existsByEmail(email);
+    }
+
+    public boolean checkExistUsername(String username) {
+        return repository.existsByUsername(username);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return repository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("No User Found"));
     }
 }
