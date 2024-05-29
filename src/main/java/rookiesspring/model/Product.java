@@ -6,6 +6,7 @@ package rookiesspring.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -37,7 +38,10 @@ import rookiesspring.model.composite_model.ProductCategory;
 public class Product extends AuditEntity<Long> {
 
     private String name;
+
+    @Column(length = 1000)
     private String description;
+
     private double price;
 
     @ColumnDefault(value = "false")
@@ -46,8 +50,8 @@ public class Product extends AuditEntity<Long> {
     @ColumnDefault(value = "0")
     private int amount;
 
-    @ColumnDefault(value = "'none'")
-    private String rating;
+    @ColumnDefault(value = "0")
+    private double rating;
 
 //    @ManyToMany()
 //    @JoinTable(name = "product_category",
@@ -55,7 +59,6 @@ public class Product extends AuditEntity<Long> {
 //            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
 //    @JsonManagedReference()
 //    private Set<Category> category;
-    
     @OneToMany(mappedBy = "product")
     @JsonManagedReference()
     private Set<ProductCategory> category;
@@ -79,6 +82,7 @@ public class Product extends AuditEntity<Long> {
     public boolean addCategory(Category c) {
         return category.add(new ProductCategory(this, c));
     }
+
     public boolean addCategory(ProductCategory pc) {
         return category.add(pc);
     }

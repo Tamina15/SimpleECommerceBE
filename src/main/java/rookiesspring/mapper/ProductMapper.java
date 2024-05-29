@@ -16,7 +16,6 @@ import rookiesspring.dto.response.custom.ProductResponseDTOShort;
 import rookiesspring.model.Category;
 import rookiesspring.model.Product;
 import rookiesspring.model.composite_model.ProductCategory;
-import static springfox.documentation.schema.property.BeanPropertyDefinitions.name;
 
 /**
  *
@@ -51,7 +50,7 @@ public class ProductMapper implements BaseMapper<Product, ProductDTO, ProductRes
             Category c = a.getCategory();
             set.add(new CategoryResponseDTOShort(c.getId(), c.getName(), c.getDescription()));
         }
-        ProductResponseDTO product_dto = new ProductResponseDTO(product.getId(), product.getName(), product.getPrice(), product.getAmount(), product.getRating(), set, product.getImages());
+        ProductResponseDTO product_dto = new ProductResponseDTO(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getAmount(), Double.toString(product.getRating()), product.isFeature(), set, product.getImages());
         return product_dto;
     }
 
@@ -66,7 +65,7 @@ public class ProductMapper implements BaseMapper<Product, ProductDTO, ProductRes
     }
 
     public ProductResponseDTOShort ToResponseDTOShort(Product product) {
-        ProductResponseDTOShort product_dto_short = new ProductResponseDTOShort(product.getId(), product.getName(), product.getPrice(), product.getAmount(), product.getRating());
+        ProductResponseDTOShort product_dto_short = new ProductResponseDTOShort(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getAmount(), Double.toString(product.getRating()));
         return product_dto_short;
     }
 

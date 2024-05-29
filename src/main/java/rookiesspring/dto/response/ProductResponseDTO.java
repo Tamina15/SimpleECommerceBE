@@ -12,6 +12,6 @@ import rookiesspring.model.Image;
  *
  * @author HP
  */
-public record ProductResponseDTO(long id, String name, double price, int amount, String rating, Set<CategoryResponseDTOShort> category, Set<Image> image) {
+public record ProductResponseDTO(long id, String name, String description, double price, int amount, String rating, boolean feature, Set<CategoryResponseDTOShort> category, Set<Image> image) {
 
 }
