@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package rookiesspring.controller;
+package rookiesspring.controller.admin;
 
+import rookiesspring.controller.*;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,13 +21,13 @@ import rookiesspring.service.AuthenticationService;
  * @author HP
  * @author Tamina
  */
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/admin/auth")
 @RestController
-public class AuthenticationController {
+public class AuthenticationAdminController {
 
     private final AuthenticationService authenticationService;
 
-    public AuthenticationController(AuthenticationService authenticationService) {
+    public AuthenticationAdminController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
 

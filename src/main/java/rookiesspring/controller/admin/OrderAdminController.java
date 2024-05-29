@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package rookiesspring.controller;
+package rookiesspring.controller.admin;
 
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.OrderDTO;
 import rookiesspring.dto.update.OrderUpdateDTO;
 import rookiesspring.service.OrderService;
-import rookiesspring.util.Util;
 
 /**
  *
@@ -28,12 +27,12 @@ import rookiesspring.util.Util;
  * @author Tamina
  */
 @RestController
-@RequestMapping("/api/v1/orders")
-public class OrderController {
+@RequestMapping("/api/v1/admin/orders")
+public class OrderAdminController {
 
     OrderService service;
 
-    public OrderController(OrderService service) {
+    public OrderAdminController(OrderService service) {
         this.service = service;
     }
 
