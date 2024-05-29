@@ -7,6 +7,7 @@ package rookiesspring.service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import rookiesspring.model.Order;
 import rookiesspring.model.Product;
 import rookiesspring.model.User;
 import rookiesspring.model.composite_model.Order_Detail;
+import rookiesspring.repository.OrderDetailRepository;
 import rookiesspring.repository.OrderRepository;
 import rookiesspring.repository.ProductRepository;
 import rookiesspring.repository.UserRepository;
@@ -40,6 +42,7 @@ public class OrderService implements OrderServiceInterface {
 
     OrderRepository repository;
     OrderMapper mapper;
+    OrderDetailRepository orderDetailRepository;
     UserRepository userRepository;
     ProductRepository productRepository;
 
@@ -139,7 +142,7 @@ public class OrderService implements OrderServiceInterface {
     public OrderResponseDTO deleteProduct(OrderUpdateDTO dto) {
         if (checkExist(dto.order_id())) {
             Order o = repository.getReferenceById(dto.order_id());
-
+            
             return mapper.ToResponseDTO(o);
         } else {
             throw new EntityNotFoundException();
@@ -149,7 +152,7 @@ public class OrderService implements OrderServiceInterface {
     public OrderResponseDTO proccessOrder(long id) {
         if (checkExist(id)) {
             Order o = repository.getReferenceById(id);
-            if(o.isProcessed()){
+            if (o.isProcessed()) {
                 return mapper.ToResponseDTO(o);
             }
             double price = 0;
@@ -186,19 +189,24 @@ public class OrderService implements OrderServiceInterface {
         this.productRepository = productRepository;
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    @Transactional
-    public void doSomethingAfterStartup() {
-        List<Order> list = repository.findAll();
-        for (Order o : list) {
-            double price = 0;
-            Set<Order_Detail> od = o.getDetails();
-            for (Order_Detail d : od) {
-                price += d.getProduct().getPrice() * d.getAmount();
-            }
-            o.setTotalPrice(String.format("%f", price));
-            repository.save(o);
-        }
+    @Autowired
+    public void setOrderDetailRepository(OrderDetailRepository orderDetailRepository) {
+        this.orderDetailRepository = orderDetailRepository;
     }
+
+//    @EventListener(ApplicationReadyEvent.class)
+//    @Transactional
+//    public void doSomethingAfterStartup() {
+//        List<Order> list = repository.findAll();
+//        for (Order o : list) {
+//            double price = 0;
+//            Set<Order_Detail> od = o.getDetails();
+//            for (Order_Detail d : od) {
+//                price += d.getProduct().getPrice() * d.getAmount();
+//            }
+//            o.setTotalPrice(String.format("%f", price));
+//            repository.save(o);
+//        }
+//    }
 
 }

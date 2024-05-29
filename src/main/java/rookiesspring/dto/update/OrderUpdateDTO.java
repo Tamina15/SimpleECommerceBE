@@ -18,5 +18,4 @@ public record OrderUpdateDTO(
         long user_id, 
         @NotBlank(message = "Product cannot be empty")
         Product_Amount[] products) {
-
 }

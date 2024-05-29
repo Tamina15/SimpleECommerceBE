@@ -4,7 +4,6 @@
  */
 package rookiesspring.dto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
  * @author Tamina
  */
 @Data
-//@NotNull(message = "Image cannot be null")
 public class UploadImageDTO {
 
     private String name;

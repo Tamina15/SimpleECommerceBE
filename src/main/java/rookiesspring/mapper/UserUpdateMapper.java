@@ -18,6 +18,7 @@ import rookiesspring.model.UserDetail;
  *
  * @author HP
  */
+
 @Mapper(componentModel = "spring")
 public interface UserUpdateMapper {
 

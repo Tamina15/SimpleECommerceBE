@@ -4,6 +4,7 @@
  */
 package rookiesspring.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,16 +37,16 @@ public class ImageService implements ImageServiceInterface {
     private ProductRepository productRepository;
 
     public void addImages(long product_id, ImageDTO[] images) {
-        Product p = productRepository.getReferenceById(product_id);
+        Product product = productRepository.getReferenceById(product_id);
         if (images.length != 0) {
             for (ImageDTO i : images) {
                 if (!repository.existsByName(i.name())) {
                     Image image = imageMapper.toEntity(i);
-                    image.setProduct(p);
-                    p.addImage(image);
+                    image.setProduct(product);
+                    product.addImage(image);
                 }
             }
-            productRepository.save(p);
+            productRepository.save(product);
         }
     }
 
@@ -60,25 +61,29 @@ public class ImageService implements ImageServiceInterface {
             productRepository.save(p);
         }
     }
-    public ResponseEntity<Map> uploadImage(UploadImageDTO uploadImageDTO) {
+    public ResponseEntity uploadImage(UploadImageDTO upload_image_DTO) {
         try {
-            if (uploadImageDTO.getName().isEmpty()) {
+            if (upload_image_DTO.getName().isEmpty()) {
                 return ResponseEntity.badRequest().build();
             }
-            if (uploadImageDTO.getFile().isEmpty()) {
+            if (upload_image_DTO.getFile().isEmpty()) {
                 return ResponseEntity.badRequest().build();
+            }
+            if(!productRepository.existsById(upload_image_DTO.getProduct_id())){
+                throw new EntityNotFoundException("Product Not Existed");
             }
             Image image = new Image();
-            image.setName(uploadImageDTO.getName());
-            image.setUrl(cloudinaryService.uploadFile(uploadImageDTO.getFile(), "product_1"));
+            image.setName(upload_image_DTO.getName());
+            image.setUrl(cloudinaryService.uploadFile(upload_image_DTO.getFile(), "product_1"));
+            Product product = productRepository.getReferenceById(upload_image_DTO.getProduct_id());
+            image.setProduct(product);
             if (image.getUrl() == null) {
                 return ResponseEntity.badRequest().build();
             }
             repository.save(image);
             return ResponseEntity.ok().body(Map.of("url", image.getUrl()));
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            return ResponseEntity.internalServerError().body("Failed to Upload Image");
         }
     }
 

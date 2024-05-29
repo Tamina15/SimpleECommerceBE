@@ -27,7 +27,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Setter
 @ToString
 @SQLDelete(sql = "UPDATE supplier SET deleted = true WHERE id=?")
-@SQLRestriction(value = "deleted=false")
+//@SQLRestriction(value = "deleted=false")
 public class Supplier extends AuditEntity<Long> {
     
     private String name;

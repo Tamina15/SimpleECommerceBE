@@ -22,31 +22,31 @@ import rookiesspring.model.composite_model.Order_Detail;
  */
 @Service
 public class OrderMapper implements BaseMapper<Order, OrderDTO, OrderResponseDTO> {
-
+    
     UserMapper userMapper;
     ProductMapper productMapper;
-
+    
     public OrderMapper(UserMapper userMapper, ProductMapper productMapper) {
         this.userMapper = userMapper;
         this.productMapper = productMapper;
     }
-
+    
     @Override
     public Order toEntity(OrderDTO dto) {
         Order o = new Order();
         return o;
     }
-
+    
     @Override
     public OrderResponseDTO ToResponseDTO(Order e) {
         Set<Product_Amount> products = new HashSet<>();
-        for(Order_Detail od : e.getDetails()){
+        for (Order_Detail od : e.getDetails()) {
             products.add(new Product_Amount(od.getProduct().getId(), od.getAmount()));
         }
         OrderResponseDTO o = new OrderResponseDTO(e.getId(), e.getTotalPrice(), e.getCreatedDate(), userMapper.ToResponseDTOShort(e.getUser()), products, e.isProcessed());
         return o;
     }
-
+    
     @Override
     public List<OrderResponseDTO> ToResponseDTOList(List<Order> e) {
         List<OrderResponseDTO> list = new ArrayList<>();
@@ -56,5 +56,5 @@ public class OrderMapper implements BaseMapper<Order, OrderDTO, OrderResponseDTO
         }
         return list;
     }
-
+    
 }
