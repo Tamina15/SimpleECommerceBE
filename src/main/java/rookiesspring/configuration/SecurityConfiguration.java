@@ -20,6 +20,8 @@ import java.util.List;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import rookiesspring.model.Role;
+import rookiesspring.util.Util;
 
 /**
  *
@@ -60,12 +62,11 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(
                         req -> req.requestMatchers("/swagger-ui/**", "/v2/api-docs/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/v1/admin/auth/**").permitAll()
-                                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.name())
                                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").hasRole("USER")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").hasRole(Role.USER.name())
+                                .requestMatchers(HttpMethod.GET, "/api/v1/users/info").hasRole(Role.USER.name())
                                 .requestMatchers(HttpMethod.GET).permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/users/info").hasRole("USER")
                                 .anyRequest().hasRole("USER")
                 )
                 .authenticationProvider(authenticationProvider)
