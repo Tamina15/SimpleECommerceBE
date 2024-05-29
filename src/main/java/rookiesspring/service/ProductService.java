@@ -5,15 +5,18 @@
 package rookiesspring.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import rookiesspring.dto.ImageDTO;
 import rookiesspring.dto.ProductDTO;
+import rookiesspring.dto.ProductRequestDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
-import rookiesspring.dto.response.custom.ProductResponseDTOShort;
 import rookiesspring.dto.update.ProductUpdateDTO;
 import rookiesspring.exception.ResourceNotFoundException;
 import rookiesspring.mapper.ImageMapper;
@@ -21,6 +24,7 @@ import rookiesspring.mapper.ProductMapper;
 import rookiesspring.model.Category;
 import rookiesspring.model.Image;
 import rookiesspring.model.Product;
+import rookiesspring.model.Rate;
 import rookiesspring.model.composite_model.ProductCategory;
 import rookiesspring.repository.CategoryRepository;
 import rookiesspring.repository.ImageRepository;
@@ -54,46 +58,28 @@ public class ProductService implements ProductServiceInterface {
         this.mapper = mapper;
     }
 
-    /**
-     * Need to change if find all category is empty
-     *
-     * @param name
-     * @param category_id
-     * @param from
-     * @param to
-     * @return
-     */
-    public List<ProductResponseDTO> findAll(String name, long[] category_id, LocalDateTime from, LocalDateTime to) {
-        if (from == null) {
-            from = Util.minDateTime;
+    @Transactional(readOnly = true)
+    public List<ProductResponseDTO> findAll(ProductRequestDTO dto) {
+        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by("rating"));
+        if (dto.getCategory_id().length == 0) {
+            dto.setCategory_id(Util.category_id);
         }
-        if (to == null) {
-            to = LocalDateTime.now();
+        List<Long> product_id = List.of();
+        if (dto.isFeatured()) {
+            product_id = repository.findAllFeaturedProductId(dto.getName(), dto.getFrom(), dto.getTo(), page_request);
+        } else {
+            product_id = repository.findAllProductId(dto.getName(), dto.getFrom(), dto.getTo(), page_request);
         }
-
-        if (name == null) {
-            name = "";
-        }
-
-        if (category_id == null || category_id.length == 0) {
-            if ("".equals(name)) {
-                return mapper.ToResponseDTOList(repository.findAll(from, to));
-            }
-            category_id = categoryRepository.getAllId();
-        }
-        return mapper.ToResponseDTOList(repository.findAll(name, category_id, from, to));
+        List<Product> products = repository.findAllWithCategoryAndImage(product_id, dto.getCategory_id());
+        return mapper.ToResponseDTOList(products);
+//        return mapper.ToResponseDTOList(repository.findAll(dto.getName(), dto.getCategory_id(), dto.getFrom(), dto.getTo()));
     }
 
-    public ProductResponseDTOShort findOneById(long id) {
-        return repository.findProjectedById(id);
-    }
-
-    public ProductResponseDTO findOneByIdFull(long id) {
+    public ProductResponseDTO findOneById(long id) {
         Product p = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException());
         return mapper.ToResponseDTO(p);
     }
 
-// done
     public ProductResponseDTO save(ProductDTO product_dto) {
         Product p = mapper.toEntity(product_dto);
         p = repository.save(p);
@@ -117,7 +103,6 @@ public class ProductService implements ProductServiceInterface {
         return mapper.ToResponseDTO(p);
     }
 
-//done
     public ProductResponseDTO addCategories(long product_id, long[] category_id) {
         Product product = repository.getReferenceById(product_id);
         if (checkExist(product_id)) {
@@ -149,20 +134,18 @@ public class ProductService implements ProductServiceInterface {
         return mapper.ToResponseDTO(p);
     }
 
-    @Transactional(rollbackOn = {RuntimeException.class})
+    @Transactional(rollbackFor = {RuntimeException.class})
     public ProductResponseDTO removeCategories(long product_id, long[] category_id) {
         if (category_id.length != 0) {
             for (long id : category_id) {
-                System.out.println(id);
                 productCategoryRepository.deleteByProductIdAndCategoryId(product_id, id);
-                
             }
         }
         productCategoryRepository.flush();
         return mapper.ToResponseDTO(repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException()));
     }
 
-    @Transactional(rollbackOn = {RuntimeException.class})
+    @Transactional(rollbackFor = {RuntimeException.class})
     public ProductResponseDTO removeImages(long product_id, long[] images_id) {
         Product p = repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException());
         if (images_id.length != 0) {
@@ -202,7 +185,7 @@ public class ProductService implements ProductServiceInterface {
 
 //    @EventListener(ApplicationReadyEvent.class)
 //    @Transactional
-//    public void doSomethingAfterStartup() {
+//    public void CalulateRating() {
 //        List<Product> products = repository.findAll();
 //        for (Product p : products) {
 //            List<Rate> rates = rateRepository.findAllByProductId(p.getId());
@@ -212,7 +195,7 @@ public class ProductService implements ProductServiceInterface {
 //                    score += r.getScore();
 //                }
 //                score = score / rates.size();
-//                p.setRating(Double.toString(score));
+//                p.setRating(Double.parseDouble(String.format("%.2f", score)));
 //                repository.save(p);
 //            }
 //        }
