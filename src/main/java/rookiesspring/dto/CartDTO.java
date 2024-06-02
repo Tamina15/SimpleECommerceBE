@@ -14,8 +14,6 @@ import jakarta.validation.constraints.NotNull;
  */
 public record CartDTO(
         @NotNull
-        long user_id,
-        @NotNull
         long product_id,
         @Min(value = 1, message = "Minimal value is 1")
         int amount) {
