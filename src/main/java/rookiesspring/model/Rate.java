@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,14 +24,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
+@AllArgsConstructor
 public class Rate extends AuditEntity<Long> {
 
-    @ManyToOne(cascade = CascadeType.ALL)  // field name inside db
+    @ManyToOne(cascade = CascadeType.MERGE)  // field name inside db
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference
     private User user;
 
-    @ManyToOne(cascade = CascadeType.ALL)  // field name inside db
+    @ManyToOne(cascade = CascadeType.MERGE)  // field name inside db
     @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference
     private Product product;

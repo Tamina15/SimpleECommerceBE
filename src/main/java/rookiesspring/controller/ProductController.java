@@ -50,4 +50,9 @@ public class ProductController {
     public ResponseEntity getProductById(@PathVariable("id") long id) {
         return ResponseEntity.ok(service.findOneById(id));
     }
+    @PostMapping("/")
+    public ResponseEntity rateProduct(Authentication auth, @Valid @RequestBody() RateDTO rate_dto) {
+        var user = (User) auth.getPrincipal();
+        return ResponseEntity.ok(service.rateProduct(rate_dto, user));
+    }
 }

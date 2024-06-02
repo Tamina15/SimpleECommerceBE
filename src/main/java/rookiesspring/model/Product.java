@@ -52,7 +52,9 @@ public class Product extends AuditEntity<Long> {
 
     @ColumnDefault(value = "0")
     private double rating;
-
+    
+    @ColumnDefault(value = "0")
+    private long total_count_rating;
 //    @ManyToMany()
 //    @JoinTable(name = "product_category",
 //            joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),

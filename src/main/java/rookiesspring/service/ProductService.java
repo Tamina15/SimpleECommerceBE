@@ -75,6 +75,21 @@ public class ProductService implements ProductServiceInterface {
 //        return mapper.ToResponseDTOList(repository.findAll(dto.getName(), dto.getCategory_id(), dto.getFrom(), dto.getTo()));
     }
 
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public RateResponseDTO rateProduct(RateDTO rate_dto, User user) {
+        Product product = repository.findById(rate_dto.product_id()).orElseThrow(() -> new EntityNotFoundException());
+        double current_rating = product.getRating();
+        long total = product.getTotal_count_rating();
+        Rate rate = new Rate(user, product, rate_dto.rating());
+        rateRepository.save(rate);
+        double rating = (current_rating * total + rate_dto.rating()) / (total + 1);
+        rating = Double.parseDouble(String.format("%.2f", rating));
+        product.setRating(rating);
+        product.setTotal_count_rating(total + 1);
+        repository.save(product);
+        return new RateResponseDTO(rating);
+    }
+
     public ProductResponseDTO findOneById(long id) {
         Product p = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException());
         return mapper.ToResponseDTO(p);
