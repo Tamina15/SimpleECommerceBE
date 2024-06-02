@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.CartDTO;
-import rookiesspring.dto.UserDTO;
 import rookiesspring.dto.update.UserUpdateDTO;
+import rookiesspring.model.User;
 import rookiesspring.service.CartService;
 import rookiesspring.service.UserService;
 import rookiesspring.util.Util;
@@ -42,7 +41,8 @@ public class UserController {
 
     @GetMapping("/info")
     public ResponseEntity getUserInfomation(Authentication auth) {
-        long user_id = (Long) auth.getPrincipal();
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
         return ResponseEntity.ok(service.findByIdFull(user_id));
     }
 
@@ -59,19 +59,22 @@ public class UserController {
 
     @PutMapping("/carts")
     public ResponseEntity addToCart(@RequestBody() CartDTO cart_dto, Authentication auth) {
-        long user_id = (long) auth.getPrincipal();
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
         return ResponseEntity.status(HttpStatus.CREATED).body(cartService.addToCart(user_id, cart_dto));
     }
 
     @DeleteMapping("/carts")
     public ResponseEntity removeFromCart(@RequestBody() CartDTO cart_dto, Authentication auth) {
-        long user_id = (long) auth.getPrincipal();
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
         return ResponseEntity.accepted().body(cartService.removefromCart(user_id, cart_dto));
     }
 
     @PostMapping("/carts")
     public ResponseEntity buy(Authentication auth) {
-        long user_id = (long) auth.getPrincipal();
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
         return ResponseEntity.status(HttpStatus.OK).body(cartService.buy(user_id));
     }
 

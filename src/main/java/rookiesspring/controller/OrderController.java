@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.OrderDTO;
 import rookiesspring.dto.update.OrderUpdateDTO;
+import rookiesspring.model.User;
 import rookiesspring.service.OrderService;
 import rookiesspring.util.Util;
 
@@ -39,31 +40,37 @@ public class OrderController {
 
     @GetMapping({"", "/"})
     public ResponseEntity getAllOrder(Authentication auth, @RequestParam(name = "from", required = false) LocalDateTime from, @RequestParam(name = "to", required = false) LocalDateTime to) {
-        long user_id = (long) auth.getPrincipal();
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
         return ResponseEntity.ok(service.findAll(user_id, from, to));
     }
 
     @GetMapping("/products")
     public ResponseEntity getAllOrderWithProducts(Authentication auth, @RequestParam(name = "from", required = false) LocalDateTime from, @RequestParam(name = "to", required = false) LocalDateTime to) {
-        long user_id = (long) auth.getPrincipal();
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
         return ResponseEntity.ok(service.findAllFull(user_id, from, to));
     }
 
     @GetMapping("/products/{id}")
     public ResponseEntity getOrderByIdWithProducts(Authentication auth, @PathVariable("id") long order_id) {
-        long user_id = (long) auth.getPrincipal();
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
         return ResponseEntity.ok(service.findByIdFull(user_id, order_id));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity getOrderById(Authentication auth, @PathVariable("id") long order_id) {
-        long user_id = (long) auth.getPrincipal();
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
         return ResponseEntity.ok(service.findById(user_id, order_id));
     }
 
     @PostMapping("/")
-    public ResponseEntity createOrder(@Valid @RequestBody OrderDTO order) {
-        return ResponseEntity.ok(service.save(order));
+    public ResponseEntity createOrder(Authentication auth, @Valid @RequestBody OrderDTO order) {
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
+        return ResponseEntity.ok(service.save(order, user_id));
     }
 
     /**

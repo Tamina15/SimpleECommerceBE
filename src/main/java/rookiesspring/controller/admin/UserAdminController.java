@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.UserDTO;
 import rookiesspring.dto.update.UserUpdateDTO;
+import rookiesspring.model.User;
 import rookiesspring.service.CartService;
 import rookiesspring.service.UserService;
 import rookiesspring.util.Util;
@@ -54,7 +55,8 @@ public class UserAdminController {
 
     @GetMapping("/info")
     public ResponseEntity getUserInfomation(Authentication auth) {
-        long user_id = (Long) auth.getPrincipal();
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
         return ResponseEntity.ok(service.findByIdFull(user_id));
     }
 
