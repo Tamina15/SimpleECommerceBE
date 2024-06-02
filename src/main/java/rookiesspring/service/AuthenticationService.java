@@ -5,21 +5,21 @@
 package rookiesspring.service;
 
 import jakarta.persistence.EntityExistsException;
-import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import rookiesspring.dto.LoginDTO;
 import rookiesspring.dto.UserDTO;
+import rookiesspring.dto.response.LoginResponseDTO;
 import rookiesspring.dto.response.UserResponseDTO;
-import rookiesspring.exception.BadRequestException;
 import rookiesspring.mapper.UserMapper;
 import rookiesspring.model.User;
 import rookiesspring.repository.UserRepository;
-import rookiesspring.util.Role;
+import rookiesspring.model.Role;
 
 /**
  *
@@ -38,23 +38,33 @@ public class AuthenticationService {
 
     private final UserMapper mapper;
 
-    public UserResponseDTO signup(UserDTO input) {
+    private final JwtService jwtService;
+
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public LoginResponseDTO signup(UserDTO input) {
         if (!userRepository.existsByEmail(input.email())) {
-            if(input.username().isBlank() || input.username().isEmpty() || input.password().isEmpty()){
-                throw new BadRequestException("Username or Password can not be empty");
-            }
             User user = mapper.toEntity(input);
             user.setPassword(passwordEncoder.encode(input.password()));
             Set<String> roles = Set.of(Role.USER.toString());
             user.setRoles(roles);
-            return mapper.ToResponseDTO(userRepository.save(user));
+            user = userRepository.save(user);
+            String jwtToken = jwtService.generateToken(user);
+            LoginResponseDTO loginResponse = new LoginResponseDTO(jwtToken, jwtService.getExpirationTime());
+            return loginResponse;
+//            return mapper.ToResponseDTO(userRepository.save(user));
         } else {
             throw new EntityExistsException("Email has been taken");
         }
     }
 
-    public User authenticate(LoginDTO input) {
+    public LoginResponseDTO authenticate(LoginDTO input) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(input.email(), input.password()));
-        return userRepository.findByEmail(input.email()).orElseThrow();
+
+        User authenticatedUser = userRepository.findByEmail(input.email()).orElseThrow();
+
+        String jwtToken = jwtService.generateToken(authenticatedUser);
+
+        LoginResponseDTO loginResponse = new LoginResponseDTO(jwtToken, jwtService.getExpirationTime());
+        return loginResponse;
     }
 }

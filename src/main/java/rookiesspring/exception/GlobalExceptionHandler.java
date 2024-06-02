@@ -4,6 +4,8 @@
  */
 package rookiesspring.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
@@ -71,8 +73,8 @@ public class GlobalExceptionHandler {
         return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getStackTrace()[0].toString()) : "Bad Request");
     }
     
-    @ExceptionHandler(MalformedJwtException.class)
-    public ResponseEntity handleMalformedJwtExceptions(MalformedJwtException e) {
+    @ExceptionHandler({MalformedJwtException.class, ExpiredJwtException.class})
+    public ResponseEntity handleMalformedJwtExceptions(JwtException e) {
         return buildException(HttpStatus.FORBIDDEN.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getMessage()) : "Malformed JWT Token");
     }
 
