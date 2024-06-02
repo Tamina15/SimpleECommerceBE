@@ -88,9 +88,10 @@ public class ProductAdminController {
      * @param uploadImageDTO
      * @return
      */
-    @PostMapping("/images/upload")
+    @PostMapping("/images")
     public ResponseEntity UploadImage(@Valid UploadImageDTO uploadImageDTO) {
-        return imageService.uploadImage(uploadImageDTO);
+        System.out.println(uploadImageDTO.toString());
+        return ResponseEntity.ok().body(imageService.uploadImage(uploadImageDTO));
     }
 
 }

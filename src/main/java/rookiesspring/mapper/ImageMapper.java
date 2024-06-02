@@ -29,7 +29,7 @@ public class ImageMapper implements BaseMapper<Image, ImageDTO, ImageResponseDTO
 
     @Override
     public ImageResponseDTO ToResponseDTO(Image e) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return new ImageResponseDTO(e.getId(), e.getUrl(), e.getName(), e.getDescription());
     }
 
     @Override

@@ -33,9 +33,9 @@ import org.hibernate.annotations.SQLDelete;
 
 public class Image extends AuditEntity<Long> {
 
-    @Column(unique = true, nullable = false)
     private String url;
 
+    @Column(unique = true, nullable = false)
     private String name;
     private String description;
 

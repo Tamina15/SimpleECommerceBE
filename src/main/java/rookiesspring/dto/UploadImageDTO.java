@@ -4,6 +4,9 @@
  */
 package rookiesspring.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import java.util.UUID;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +18,16 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 public class UploadImageDTO {
 
-    private String name;
+    @Positive
+    private long product_id;
+    private String name = UUID.randomUUID().toString();
+    @NotNull(message = "File must not be null")
     private MultipartFile file;
+
+    public void setName(String name) {
+        if (name != null) {
+            this.name = name;
+        }
+    }
+
 }

@@ -11,6 +11,6 @@ package rookiesspring.dto.response;
  * @author Tamina
  */
 
-public record ImageResponseDTO(long id, String url, String name, String description, long product_id) {
+public record ImageResponseDTO(long id, String url, String name, String description) {
 
 }
