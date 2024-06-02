@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.LoginDTO;
 import rookiesspring.dto.UserDTO;
+import rookiesspring.dto.response.LoginResponseDTO;
 import rookiesspring.dto.response.UserResponseDTO;
 import rookiesspring.service.AuthenticationService;
 
@@ -33,7 +34,7 @@ public class AuthenticationAdminController {
 
     @PostMapping("/signup")
     public ResponseEntity register(@Valid @RequestBody UserDTO registerUserDto) {
-        UserResponseDTO registeredUser = authenticationService.signup(registerUserDto);
+        LoginResponseDTO registeredUser = authenticationService.signup(registerUserDto);
         return ResponseEntity.ok().body(registeredUser);
     }
 

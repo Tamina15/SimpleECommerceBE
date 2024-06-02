@@ -43,7 +43,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:8080/api/v1/", "http://localhost:3000"));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:8080/api/v1/", "http://localhost:3000", "http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowCredentials(true);
         config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
@@ -62,12 +62,14 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(
                         req -> req.requestMatchers("/swagger-ui/**", "/v2/api-docs/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/admin/auth/**").permitAll()
                                 .requestMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.name())
                                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").hasRole(Role.USER.name())
                                 .requestMatchers(HttpMethod.GET, "/api/v1/users/info").hasRole(Role.USER.name())
+                                .requestMatchers(HttpMethod.POST, "/api/v1/products/").hasRole(Role.USER.name())
                                 .requestMatchers(HttpMethod.GET).permitAll()
-                                .anyRequest().hasRole("USER")
+                                .anyRequest().hasAnyRole(Role.USER.name(), Role.ADMIN.name())
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
