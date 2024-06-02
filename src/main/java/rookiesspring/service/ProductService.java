@@ -162,12 +162,19 @@ public class ProductService implements ProductServiceInterface {
 
     @Transactional(rollbackFor = {RuntimeException.class})
     public ProductResponseDTO removeImages(long product_id, long[] images_id) {
+    public ProductResponseDTO removeImages(long product_id, long[] images_id, boolean forced) {
         Product p = repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException());
         if (images_id.length != 0) {
             for (long id : images_id) {
                 Image i = imageRepository.getReferenceById(id);
                 p.removeImage(i);
                 imageRepository.delete(i);
+                if (forced) {
+                    p.removeImage(i);
+                    imageRepository.hardDelete(id);
+                } else {
+                    imageRepository.delete(i);
+                }
             }
         }
         return mapper.ToResponseDTO(p);
@@ -180,11 +187,11 @@ public class ProductService implements ProductServiceInterface {
         p.setPrice(product_dto.price());
         p.setAmount(product_dto.amount());
         repository.save(p);
-        p = repository.findById(p.getId()).orElseThrow(() -> new ResourceNotFoundException());
+//        p = repository.findById(p.getId()).orElseThrow(() -> new ResourceNotFoundException());
         return mapper.ToResponseDTO(p);
     }
 
-    public void delete(long id) {
+    public void delete(long id, boolean forcedDelete) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
         }

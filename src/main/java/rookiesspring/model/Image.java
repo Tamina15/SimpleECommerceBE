@@ -29,6 +29,8 @@ import org.hibernate.annotations.SQLDelete;
 @Getter
 @Setter
 @ToString
+@SQLDelete(sql = "UPDATE image SET deleted = true WHERE id=?")
+
 public class Image extends AuditEntity<Long> {
 
     @Column(unique = true, nullable = false)

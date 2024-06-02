@@ -19,6 +19,7 @@ import jakarta.persistence.Transient;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
@@ -35,7 +36,8 @@ public abstract class AuditEntity<P extends Serializable> extends IdEntity<P> im
     @LastModifiedDate
     LocalDateTime updatedDate;
 
-    boolean deleted = Boolean.FALSE;
+    @ColumnDefault(value = "false")
+    boolean deleted;
 
     @Transient
     @Override

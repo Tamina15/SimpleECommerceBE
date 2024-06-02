@@ -71,14 +71,14 @@ public class ProductAdminController {
         return ResponseEntity.ok().body(service.removeCategories(product_id, category_id));
     }
 
-    @DeleteMapping("/images/")
-    public ResponseEntity removeImages(@RequestBody() RemoveImageDTO remove_image) {
-        return ResponseEntity.ok().body(service.removeImages(remove_image.product_id(), remove_image.image_id()));
+    @DeleteMapping("/images")
+    public ResponseEntity removeImages(@Valid @RequestBody() RemoveImageDTO remove_image) {
+        return ResponseEntity.ok().body(service.removeImages(remove_image.product_id(), remove_image.image_id(), remove_image.hard()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteProduct(@PathVariable("id") long id) {
-        service.delete(id);
+    public ResponseEntity deleteProduct(@PathVariable("id") long id, @RequestParam("forced") boolean forcedDelete) {
+        service.delete(id, forcedDelete);
         return ResponseEntity.accepted().body(Util.message("Delete Successfully"));
     }
 
