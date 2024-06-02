@@ -22,10 +22,18 @@ public class ProductRequestDTO {
 
     private LocalDateTime from = Util.minDateTime;
     private LocalDateTime to = LocalDateTime.now();
-    private int limit = 15;
+    private int limit = 12;
     @PositiveOrZero()
     private int page = 0;
     private boolean featured = false;
+    private String sortBy = "rating";
+    private String order = "ASC";
+
+    public void setOrder(String order) {
+        if (order.equals("DESC")) {
+            this.order = order;
+        }
+    }
 
     public void setFrom(LocalDateTime from) {
         this.from = from == null ? Util.minDateTime : from;

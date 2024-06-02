@@ -5,6 +5,7 @@
 package rookiesspring.controller.admin;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +21,8 @@ import rookiesspring.dto.ProductDTO;
 import rookiesspring.dto.ProductRequestDTO;
 import rookiesspring.dto.RemoveImageDTO;
 import rookiesspring.dto.UploadImageDTO;
+import rookiesspring.dto.response.ProductResponseDTO;
+import rookiesspring.dto.response.custom.ProductPagination;
 import rookiesspring.dto.update.ProductUpdateDTO;
 import rookiesspring.service.ImageService;
 import rookiesspring.service.ProductService;
@@ -41,9 +44,11 @@ public class ProductAdminController {
         this.service = service;
     }
 
-    @GetMapping("/")
-    public ResponseEntity getAllProducts(@RequestParam() @Valid ProductRequestDTO dto) {
-        return ResponseEntity.ok(service.findAll(dto));
+    @GetMapping("")
+    public ResponseEntity getAllProducts(@Valid ProductRequestDTO dto) {
+        List<ProductResponseDTO> list_products = service.findAll(dto);
+        long count = service.countAll(dto.isFeatured(), Util.toLongList(dto.getCategory_id()));
+        return ResponseEntity.ok().body(new ProductPagination(list_products, count));
     }
 
     @GetMapping("/{id}")
@@ -51,12 +56,12 @@ public class ProductAdminController {
         return ResponseEntity.ok(service.findOneById(id));
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     public ResponseEntity addProduct(@RequestBody() ProductDTO product) {
         return ResponseEntity.ok(service.save(product));
     }
 
-    @PutMapping("/")
+    @PutMapping("")
     public ResponseEntity updateProduct(@Valid @RequestBody() ProductUpdateDTO product) {
         return ResponseEntity.ok(service.update(product));
     }

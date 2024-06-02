@@ -7,8 +7,6 @@ package rookiesspring.service;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -16,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import rookiesspring.dto.ImageDTO;
 import rookiesspring.dto.ProductDTO;
 import rookiesspring.dto.ProductRequestDTO;
+import rookiesspring.dto.RateDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
+import rookiesspring.dto.response.RateResponseDTO;
 import rookiesspring.dto.update.ProductUpdateDTO;
 import rookiesspring.exception.ResourceNotFoundException;
 import rookiesspring.mapper.ImageMapper;
@@ -25,6 +25,7 @@ import rookiesspring.model.Category;
 import rookiesspring.model.Image;
 import rookiesspring.model.Product;
 import rookiesspring.model.Rate;
+import rookiesspring.model.User;
 import rookiesspring.model.composite_model.ProductCategory;
 import rookiesspring.repository.CategoryRepository;
 import rookiesspring.repository.ImageRepository;
@@ -32,6 +33,8 @@ import rookiesspring.repository.ProductCategoryRepository;
 import rookiesspring.repository.ProductRepository;
 import rookiesspring.repository.RateRepository;
 import rookiesspring.service.interfaces.ProductServiceInterface;
+import rookiesspring.specification.ProductSpecification;
+import rookiesspring.specification.RateSpecification;
 import rookiesspring.util.Util;
 
 /**
@@ -60,19 +63,31 @@ public class ProductService implements ProductServiceInterface {
 
     @Transactional(readOnly = true)
     public List<ProductResponseDTO> findAll(ProductRequestDTO dto) {
-        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by("rating"));
+        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrder()), dto.getSortBy()));
         if (dto.getCategory_id().length == 0) {
             dto.setCategory_id(Util.category_id);
         }
-        List<Long> product_id = List.of();
+        List<Long> product_id;
         if (dto.isFeatured()) {
             product_id = repository.findAllFeaturedProductId(dto.getName(), dto.getFrom(), dto.getTo(), page_request);
         } else {
             product_id = repository.findAllProductId(dto.getName(), dto.getFrom(), dto.getTo(), page_request);
         }
+        product_id.iterator().forEachRemaining((t) -> {
+            System.out.print(t + " ");
+        });
+        System.out.println("");
         List<Product> products = repository.findAllWithCategoryAndImage(product_id, dto.getCategory_id());
+        products.iterator().forEachRemaining((t) -> {
+            System.out.print(t.getId());
+        });
+        System.out.println("");
         return mapper.ToResponseDTOList(products);
 //        return mapper.ToResponseDTOList(repository.findAll(dto.getName(), dto.getCategory_id(), dto.getFrom(), dto.getTo()));
+    }
+
+    public long countAll(boolean feature, List<Long> category_id) {
+        return repository.count(ProductSpecification.countAllWithCategoryIn(category_id).and(ProductSpecification.countAllFeatured(feature)));
     }
 
     @Transactional(rollbackFor = {RuntimeException.class})
@@ -161,14 +176,11 @@ public class ProductService implements ProductServiceInterface {
     }
 
     @Transactional(rollbackFor = {RuntimeException.class})
-    public ProductResponseDTO removeImages(long product_id, long[] images_id) {
     public ProductResponseDTO removeImages(long product_id, long[] images_id, boolean forced) {
         Product p = repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException());
         if (images_id.length != 0) {
             for (long id : images_id) {
                 Image i = imageRepository.getReferenceById(id);
-                p.removeImage(i);
-                imageRepository.delete(i);
                 if (forced) {
                     p.removeImage(i);
                     imageRepository.hardDelete(id);
@@ -211,6 +223,7 @@ public class ProductService implements ProductServiceInterface {
 //        List<Product> products = repository.findAll();
 //        for (Product p : products) {
 //            List<Rate> rates = rateRepository.findAllByProductId(p.getId());
+//            long count = rateRepository.count(RateSpecification.countAllRating(p.getId()));
 //            if (!rates.isEmpty()) {
 //                double score = 0;
 //                for (Rate r : rates) {
@@ -218,6 +231,7 @@ public class ProductService implements ProductServiceInterface {
 //                }
 //                score = score / rates.size();
 //                p.setRating(Double.parseDouble(String.format("%.2f", score)));
+//                p.setTotal_count_rating(count);
 //                repository.save(p);
 //            }
 //        }

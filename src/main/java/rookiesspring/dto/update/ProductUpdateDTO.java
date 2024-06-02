@@ -6,7 +6,7 @@ package rookiesspring.dto.update;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import rookiesspring.dto.ImageDTO;
+import jakarta.validation.constraints.Size;
 
 /**
  *
@@ -14,10 +14,12 @@ import rookiesspring.dto.ImageDTO;
  */
 public record ProductUpdateDTO(
         @NotNull(message = "Product Id cannot be null")
-        long id, String name, String description,
+        long id, 
+        String name,
+        @Size(max = 255, message = "Maximum Desciption length is 255")
+        String description,
         @Min(value = 1, message = "Minimal Price is 1")
         double price,
         @Min(value = 1, message = "Minimal Amount is 1")
         int amount) {
-
 }
