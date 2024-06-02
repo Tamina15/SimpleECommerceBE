@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import rookiesspring.dto.CategoryDTO;
 import rookiesspring.dto.response.CategoryResponseDTO;
@@ -18,11 +20,13 @@ import rookiesspring.dto.update.CategoryUpdateDTO;
 import rookiesspring.mapper.CategoryMapper;
 import rookiesspring.model.Category;
 import rookiesspring.model.Product;
+import rookiesspring.model.Rate;
 import rookiesspring.model.composite_model.ProductCategory;
 import rookiesspring.repository.CategoryRepository;
 import rookiesspring.repository.ProductCategoryRepository;
 import rookiesspring.repository.ProductRepository;
 import rookiesspring.service.interfaces.CategoryServiceInterface;
+import rookiesspring.util.Util;
 
 /**
  *
@@ -73,6 +77,7 @@ public class CategoryService implements CategoryServiceInterface {
             }
         }
         c.setProducts(set);
+        Util.addCategory(c.getId());
         return mapper.ToResponseDTO(repository.findById(c.getId()).get());
     }
 
@@ -88,13 +93,15 @@ public class CategoryService implements CategoryServiceInterface {
         return mapper.ToResponseDTOShort(c);
     }
 
-    public boolean delete(long id) {
+    public void delete(long id) {
         if (checkExist(id)) {
-            Category c = repository.getReferenceById(id);
+//            Category c = repository.getReferenceById(id);
             repository.deleteById(id);
-            return true;
+            Util.addCategory(id);
+        } else {
+            throw new EntityNotFoundException("No Category exists");
         }
-        return false;
+
     }
 
     public CategoryResponseDTO addProduct(long category_id, long[] product_ids) {
@@ -137,5 +144,11 @@ public class CategoryService implements CategoryServiceInterface {
     public void setProductRepository(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
-
+    @EventListener(ApplicationReadyEvent.class)
+    @Transactional
+    public void CacheId() {
+        for(Long l :repository.getAllId()){
+            Util.addCategory(l);
+        }
+    }
 }

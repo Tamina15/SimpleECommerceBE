@@ -5,7 +5,8 @@
 package rookiesspring.util;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -35,6 +36,13 @@ public class Util {
         }
         new_array[new_array.length - 1] = id;
         category_id = new_array;
+    }
+    public static List<Long> toLongList(long[] array){
+        List<Long> list = new ArrayList(array.length);
+        for(long l : array){
+            list.add((Long) l);
+        }
+        return list;
     }
 }
 
