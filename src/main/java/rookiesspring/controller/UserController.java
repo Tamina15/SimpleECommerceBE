@@ -4,6 +4,7 @@
  */
 package rookiesspring.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.CartDTO;
+import rookiesspring.dto.RemoveUserDTO;
 import rookiesspring.dto.update.UserUpdateDTO;
 import rookiesspring.model.User;
 import rookiesspring.service.CartService;
@@ -43,7 +45,7 @@ public class UserController {
     public ResponseEntity getUserInfomation(Authentication auth) {
         var user = (User) auth.getPrincipal();
         long user_id = user.getId();
-        return ResponseEntity.ok(service.findByIdFull(user_id));
+        return ResponseEntity.ok(service.getUserInfo(user_id));
     }
 
     @PutMapping("/")
@@ -51,9 +53,9 @@ public class UserController {
         return ResponseEntity.ok(service.updateOne(user_dto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity DeleteUser(@PathVariable(value = "id") Long id) {
-        service.deleteById(id);
+    @DeleteMapping("")
+    public ResponseEntity DeleteUser(@Valid @RequestBody() RemoveUserDTO remove_user_dto) {
+        service.deleteById(remove_user_dto);
         return ResponseEntity.accepted().body(Util.message("Delete Successfully"));
     }
 

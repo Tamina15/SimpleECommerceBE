@@ -37,14 +37,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 @Setter
 @Table(name = "`user`")
-@SQLDelete(sql = "UPDATE \"user\" SET deleted = true WHERE id=?")
-//@SQLRestriction(value = "deleted = false")
 public class User extends AuditEntity<Long> implements UserDetails {
 
     @Column(unique = true)
     private String email;
 
     private String username;
+    
     private String password;
     private String refreshToken;
     private boolean isBlock = false;
@@ -57,7 +56,7 @@ public class User extends AuditEntity<Long> implements UserDetails {
     @JsonManagedReference()
     private List<Rate> rates;
 
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @PrimaryKeyJoinColumn
     UserDetail user_detail;
 

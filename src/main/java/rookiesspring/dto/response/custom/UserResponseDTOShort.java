@@ -10,6 +10,6 @@ import java.util.Set;
  *
  * @author HP
  */
-public record UserResponseDTOShort(long id, String username, String email, Set<String> roles) {
+public record UserResponseDTOShort(long id, String username, String email, boolean isBlock, boolean deleted, Set<String> roles) {
 
 }

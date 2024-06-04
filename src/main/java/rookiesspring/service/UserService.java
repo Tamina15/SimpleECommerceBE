@@ -8,12 +8,18 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import rookiesspring.dto.RemoveUserDTO;
 import rookiesspring.dto.UserDTO;
+import rookiesspring.dto.UserRequestDTO;
 import rookiesspring.dto.response.UserResponseDTO;
+import rookiesspring.dto.response.custom.UserPaginationShort;
 import rookiesspring.dto.response.custom.UserResponseDTOShort;
 import rookiesspring.dto.update.UserUpdateDTO;
 import rookiesspring.mapper.UserMapper;
@@ -46,21 +52,15 @@ public class UserService implements UserServiceInterface, UserDetailsService {
         return repository.findProjectedById(userId).orElseThrow(() -> new EntityNotFoundException());
     }
 
-    public List<UserResponseDTOShort> findAllByUsername(String username) {
-        if (username == null) {
-            username = "";
-        }
-        return repository.findAllProjectedByUsernameContainsIgnoreCase(username);
+    @Transactional(readOnly = true)
+    public UserPaginationShort findAllUser(UserRequestDTO dto) {
+        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrderBy()), dto.getSortBy()));
+        List<UserResponseDTOShort> users = repository.findAllProjectedBy(page_request);
+        long count = repository.count();
+        return new UserPaginationShort(users, count);
     }
 
-    public List<UserResponseDTO> findAllFull(String username) {
-        if (username == null) {
-            username = "";
-        }
-        return mapper.ToResponseDTOList(repository.findAll(username));
-    }
-
-    public UserResponseDTO findByIdFull(Long userId) {
+    public UserResponseDTO getUserInfo(Long userId) {
         return mapper.ToResponseDTO(repository.findById(userId).orElseThrow(() -> new EntityNotFoundException()));
     }
 
@@ -75,7 +75,6 @@ public class UserService implements UserServiceInterface, UserDetailsService {
     }
 
     public UserResponseDTOShort updateOne(UserUpdateDTO user_dto) {
-
         User u = repository.findById(user_dto.id()).orElseThrow(() -> new EntityNotFoundException("No value present"));
         if (user_dto.email() != null) {
             if (checkExistEmail(user_dto.email())) {
@@ -89,15 +88,35 @@ public class UserService implements UserServiceInterface, UserDetailsService {
         updateMapper.updateUserFromDto(user_dto, u);
         detail.setAddress(address);
         u.setUser_detail(detail);
-
         repository.save(u);
         return mapper.ToResponseDTOShort(u);
-
     }
 
-    public void deleteById(long id) {
-        if (checkExist(id)) {
-            repository.deleteById(id);
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public void deleteById(RemoveUserDTO dto) {
+        if (checkExist(dto.user_id())) {
+            if (dto.hard()) {
+                repository.deleteById(dto.user_id());
+            } else {
+                repository.softDeleteById(dto.user_id());
+            }
+        } else {
+            throw new EntityNotFoundException();
+        }
+    }
+
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public UserResponseDTOShort blockOrUnblockUser(long user_id, boolean block) {
+        User user = repository.findById(user_id).orElseThrow(() -> new EntityNotFoundException("No value present"));
+        user.setBlock(block);
+        repository.save(user);
+        return mapper.ToResponseDTOShort(user);
+    }
+
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public void restoreUser(Long user_id) {
+        if (checkExist(user_id)) {
+            repository.restoreUser(user_id);
         } else {
             throw new EntityNotFoundException();
         }
@@ -120,4 +139,5 @@ public class UserService implements UserServiceInterface, UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("No User Found"));
     }
+
 }

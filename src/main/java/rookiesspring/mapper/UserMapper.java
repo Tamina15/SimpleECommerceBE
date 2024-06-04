@@ -63,7 +63,7 @@ public class UserMapper implements BaseMapper<User, UserDTO, UserResponseDTO> {
     }
 
     public UserResponseDTOShort ToResponseDTOShort(User e) {
-        UserResponseDTOShort u = new UserResponseDTOShort(e.getId(), e.getUserName(), e.getEmail(), e.getRoles());
+        UserResponseDTOShort u = new UserResponseDTOShort(e.getId(), e.getUserName(), e.getEmail(), e.isBlock(), e.isDeleted(), e.getRoles());
         return u;
     }
 }

@@ -6,10 +6,11 @@ package rookiesspring.repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.userdetails.UserDetails;
 import rookiesspring.dto.response.custom.UserResponseDTOShort;
 import rookiesspring.model.User;
 
@@ -31,6 +32,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     public List<UserResponseDTOShort> findAllProjectedBy();
 
+    public List<UserResponseDTOShort> findAllProjectedBy(Pageable pageable);
+
     public Optional<UserResponseDTOShort> findProjectedById(Long userId);
 
     public List<UserResponseDTOShort> findAllProjectedByUsernameContainsIgnoreCase(String username);
@@ -42,5 +45,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     public Optional<User> findByUsername(String username);
 
     public Optional<User> findByEmail(String email);
+
     public Optional<UserResponseDTOShort> findProjectedByEmail(String email);
+
+    @Query(value = "update User u set u.deleted = true where u.id = ?1")
+    @Modifying
+    public void softDeleteById(@Param(value = "id") long user_id);
+    
+    @Query(value = "update User u set u.deleted = false where u.id = ?1")
+    @Modifying
+    public void restoreUser(@Param(value = "id") Long user_id);
 }
