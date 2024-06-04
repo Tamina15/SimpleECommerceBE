@@ -16,6 +16,6 @@ public record RateDTO(
         @NotNull(message = "Product Id cannot be null")
         long product_id,
         @Positive(message = ("Rate cannot be zero"))
-        int rating) {
+        int rating, String comment) {
 
 }

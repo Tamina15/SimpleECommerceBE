@@ -38,6 +38,7 @@ public class Rate extends AuditEntity<Long> {
     private Product product;
 
     private int score;
+    private String comment;
 
     @Override
     public int hashCode() {

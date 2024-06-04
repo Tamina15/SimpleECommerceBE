@@ -6,7 +6,6 @@ package rookiesspring.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +19,8 @@ import rookiesspring.dto.RateDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
 import rookiesspring.dto.response.custom.ProductPagination;
 import rookiesspring.model.User;
-import rookiesspring.service.ImageService;
 import rookiesspring.service.ProductService;
+import rookiesspring.service.RateService;
 import rookiesspring.util.Util;
 
 /**
@@ -32,9 +31,8 @@ import rookiesspring.util.Util;
 @RequestMapping("/api/v1/products")
 public class ProductController {
 
-    private ProductService service;
-    @Autowired
-    private ImageService imageService;
+    private final ProductService service;
+    
 
     public ProductController(ProductService service) {
         this.service = service;
@@ -51,9 +49,6 @@ public class ProductController {
     public ResponseEntity getProductById(@PathVariable("id") long id) {
         return ResponseEntity.ok(service.findOneById(id));
     }
-    @PostMapping("/")
-    public ResponseEntity rateProduct(Authentication auth, @Valid @RequestBody() RateDTO rate_dto) {
-        var user = (User) auth.getPrincipal();
-        return ResponseEntity.ok(service.rateProduct(rate_dto, user));
-    }
+
+
 }

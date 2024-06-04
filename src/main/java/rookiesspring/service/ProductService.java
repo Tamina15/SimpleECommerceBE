@@ -34,7 +34,6 @@ import rookiesspring.repository.ProductRepository;
 import rookiesspring.repository.RateRepository;
 import rookiesspring.service.interfaces.ProductServiceInterface;
 import rookiesspring.specification.ProductSpecification;
-import rookiesspring.specification.RateSpecification;
 import rookiesspring.util.Util;
 
 /**
@@ -90,20 +89,6 @@ public class ProductService implements ProductServiceInterface {
         return repository.count(ProductSpecification.countAllWithCategoryIn(category_id).and(ProductSpecification.countAllFeatured(feature)));
     }
 
-    @Transactional(rollbackFor = {RuntimeException.class})
-    public RateResponseDTO rateProduct(RateDTO rate_dto, User user) {
-        Product product = repository.findById(rate_dto.product_id()).orElseThrow(() -> new EntityNotFoundException());
-        double current_rating = product.getRating();
-        long total = product.getTotal_count_rating();
-        Rate rate = new Rate(user, product, rate_dto.rating());
-        rateRepository.save(rate);
-        double rating = (current_rating * total + rate_dto.rating()) / (total + 1);
-        rating = Double.parseDouble(String.format("%.2f", rating));
-        product.setRating(rating);
-        product.setTotal_count_rating(total + 1);
-        repository.save(product);
-        return new RateResponseDTO(rating);
-    }
 
     public ProductResponseDTO findOneById(long id) {
         Product p = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException());
@@ -214,27 +199,4 @@ public class ProductService implements ProductServiceInterface {
         return repository.existsById(id);
     }
 
-    @Autowired
-    RateRepository rateRepository;
-
-//    @EventListener(ApplicationReadyEvent.class)
-//    @Transactional
-//    public void CalulateRating() {
-//        List<Product> products = repository.findAll();
-//        for (Product p : products) {
-//            List<Rate> rates = rateRepository.findAllByProductId(p.getId());
-//            long count = rateRepository.count(RateSpecification.countAllRating(p.getId()));
-//            if (!rates.isEmpty()) {
-//                double score = 0;
-//                for (Rate r : rates) {
-//                    score += r.getScore();
-//                }
-//                score = score / rates.size();
-//                p.setRating(Double.parseDouble(String.format("%.2f", score)));
-//                p.setTotal_count_rating(count);
-//                repository.save(p);
-//            }
-//        }
-//        System.out.println("Finding all Rating");
-//    }
 }
