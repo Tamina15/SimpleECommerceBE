@@ -37,9 +37,22 @@ public class Util {
         new_array[new_array.length - 1] = id;
         category_id = new_array;
     }
-    public static List<Long> toLongList(long[] array){
+
+    public static void removeCategory(long id) {
+        long[] new_array = new long[category_id.length - 1];
+        int j = 0;
+        for (int i = 0; i < category_id.length; i++) {
+            if (category_id[i] != id) {
+                new_array[j] = category_id[i];
+                j++;
+            }
+        }
+        category_id = new_array;
+    }
+
+    public static List<Long> toLongList(long[] array) {
         List<Long> list = new ArrayList(array.length);
-        for(long l : array){
+        for (long l : array) {
             list.add((Long) l);
         }
         return list;

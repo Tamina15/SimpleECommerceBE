@@ -10,6 +10,12 @@ import jakarta.validation.constraints.NotNull;
  *
  * @author HP
  */
-public record CategoryUpdateDTO(@NotNull(message = "Category Id must not be null")long id, String name, String description) {
+public record CategoryUpdateDTO(
+        @NotNull(message = "Category Id must not be null")
+        long id,
+        @NotNull(message = "Category Name must not be null")
+        String name,
+        @NotNull(message = "Category Description must not be null")
+        String description) {
 
 }

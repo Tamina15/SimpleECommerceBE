@@ -25,28 +25,14 @@ import rookiesspring.model.composite_model.ProductCategory;
 @NoArgsConstructor
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE category SET deleted = true WHERE id=?")
-//@SQLRestriction(value = "deleted=false")
 public class Category extends AuditEntity<Long> {
 
     private String name;
     private String description;
 
-//    @ManyToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-//    @JsonBackReference
-//    private Set<Product> products;
-
-    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "category", cascade = {CascadeType.ALL})
     @JsonBackReference
     private Set<ProductCategory> products = new HashSet<>();
-
-//    public void addProduct(Product p) {
-//        products.add(p);
-//    }
-//
-//    public void removeProduct(Product p) {
-//        products.remove(p);
-//    }
 
     @Override
     public String toString() {
