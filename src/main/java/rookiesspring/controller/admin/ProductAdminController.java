@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -76,9 +77,21 @@ public class ProductAdminController {
         return ResponseEntity.ok().body(service.removeCategories(product_id, category_id));
     }
 
+    @PostMapping("/images")
+    public ResponseEntity uploadImage(@Valid UploadImageDTO uploadImageDTO) {
+        System.out.println(uploadImageDTO.toString());
+        return ResponseEntity.ok().body(imageService.uploadImage(uploadImageDTO));
+    }
+
     @DeleteMapping("/images")
     public ResponseEntity removeImages(@Valid @RequestBody() RemoveImageDTO remove_image) {
-        return ResponseEntity.ok().body(service.removeImages(remove_image.product_id(), remove_image.image_id(), remove_image.hard()));
+        return ResponseEntity.ok().body(imageService.removeImages(remove_image.product_id(), remove_image.image_id(), remove_image.hard()));
+    }
+
+    @PatchMapping("/images/{id}")
+    public ResponseEntity restoreImages(@PathVariable("id") long image_id) {
+        imageService.restoreImages(image_id);
+        return ResponseEntity.ok().body(Util.message("Restores Image Successfully"));
     }
 
     @DeleteMapping("/{id}")
@@ -86,17 +99,11 @@ public class ProductAdminController {
         service.delete(id, forcedDelete);
         return ResponseEntity.accepted().body(Util.message("Delete Successfully"));
     }
-
-    /**
-     * Need to include product id
-     *
-     * @param uploadImageDTO
-     * @return
-     */
-    @PostMapping("/images")
-    public ResponseEntity UploadImage(@Valid UploadImageDTO uploadImageDTO) {
-        System.out.println(uploadImageDTO.toString());
-        return ResponseEntity.ok().body(imageService.uploadImage(uploadImageDTO));
+    
+    @PatchMapping("/{id}")
+    public ResponseEntity restoreProduct(@PathVariable("id") long id) {
+        service.restore(id);
+        return ResponseEntity.accepted().body(Util.message("Delete Successfully"));
     }
 
 }

@@ -5,16 +5,15 @@
 package rookiesspring.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import rookiesspring.dto.ImageDTO;
-import rookiesspring.dto.ProductDTO_1;
+import org.springframework.transaction.annotation.Transactional;
 import rookiesspring.dto.UploadImageDTO;
 import rookiesspring.dto.response.ImageResponseDTO;
+import rookiesspring.dto.response.ProductResponseDTO;
 import rookiesspring.exception.BadRequestException;
 import rookiesspring.mapper.ImageMapper;
+import rookiesspring.mapper.ProductMapper;
 import rookiesspring.model.Image;
 import rookiesspring.model.Product;
 import rookiesspring.repository.ImageRepository;
@@ -29,38 +28,43 @@ import rookiesspring.service.interfaces.ImageServiceInterface;
 @Service
 public class ImageService implements ImageServiceInterface {
 
-    @Autowired
-    private ImageRepository repository;
-    @Autowired
-    ImageMapper imageMapper;
-    @Autowired
-    private CloudinaryService cloudinaryService;
-    @Autowired
-    private ProductRepository productRepository;
+    private final ImageRepository repository;
+    private final ImageMapper mapper;
+    private final CloudinaryService cloudinaryService;
+    private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
 
-    public void addImages(long product_id, ImageDTO[] images) {
-        Product product = productRepository.getReferenceById(product_id);
-        if (images.length != 0) {
-            for (ImageDTO i : images) {
-                if (!repository.existsByName(i.name())) {
-                    Image image = imageMapper.toEntity(i);
-                    image.setProduct(product);
-                    product.addImage(image);
-                }
-            }
-            productRepository.save(product);
-        }
+    public ImageService(ImageRepository repository, ImageMapper mapper, CloudinaryService cloudinaryService, ProductRepository productRepository, ProductMapper productMapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+        this.cloudinaryService = cloudinaryService;
+        this.productRepository = productRepository;
+        this.productMapper = productMapper;
     }
 
-    public void removeImages(long product_id, long[] images_id) {
-        Product p = productRepository.getReferenceById(product_id);
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public ProductResponseDTO removeImages(long product_id, long[] images_id, boolean forced) {
+        Product p = productRepository.findById(product_id).orElseThrow(() -> new EntityNotFoundException());
         if (images_id.length != 0) {
             for (long id : images_id) {
                 Image i = repository.getReferenceById(id);
-                System.out.println(i.getId());
-                p.removeImage(i);
+                if (forced) {
+                    p.removeImage(i);
+                    repository.hardDelete(id);
+                } else {
+                    repository.delete(i);
+                }
             }
-            productRepository.save(p);
+        }
+        return productMapper.ToResponseDTO(p);
+    }
+
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public void restoreImages(long image_id) {
+        if (repository.existsById(image_id)) {
+            repository.restore(image_id);
+        } else {
+            throw new EntityNotFoundException();
         }
     }
 
@@ -78,16 +82,8 @@ public class ImageService implements ImageServiceInterface {
         if (image.getUrl() == null) {
             throw new BadRequestException("Failed to Upload Image");
         }
-
         repository.save(image);
-
-        return imageMapper.ToResponseDTO(image);
-
-//            return ResponseEntity.ok().body(Map.of("url", image.getUrl()));
-    }
-
-    public ResponseEntity<Map> uploadImage(ProductDTO_1 productDTO) {
-        return null;
+        return mapper.ToResponseDTO(image);
     }
 
     @Override

@@ -50,7 +50,7 @@ public class ProductMapper implements BaseMapper<Product, ProductDTO, ProductRes
             Category c = a.getCategory();
             set.add(new CategoryResponseDTOShort(c.getId(), c.getName(), c.getDescription()));
         }
-        ProductResponseDTO product_dto = new ProductResponseDTO(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getAmount(), Double.toString(product.getRating()), product.isFeature(), set, product.getImages());
+        ProductResponseDTO product_dto = new ProductResponseDTO(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getAmount(), Double.toString(product.getRating()), product.isFeature(), set, product.getImages(), product.getCreatedDate(), product.getUpdatedDate(), product.isDeleted());
         return product_dto;
     }
 

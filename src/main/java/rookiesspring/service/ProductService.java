@@ -4,6 +4,7 @@
  */
 package rookiesspring.service;
 
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,25 +69,19 @@ public class ProductService implements ProductServiceInterface {
         }
         List<Long> product_id;
         if (dto.isFeatured()) {
-            product_id = repository.findAllFeaturedProductId(dto.getName(), dto.getFrom(), dto.getTo(), page_request);
+            product_id = repository.findAllFeaturedProductId(dto.getName(), dto.getFrom(), dto.getTo(), dto.getCategory_id(), page_request);
         } else {
-            product_id = repository.findAllProductId(dto.getName(), dto.getFrom(), dto.getTo(), page_request);
+            product_id = repository.findAllProductId(dto.getName(), dto.getFrom(), dto.getTo(), dto.getCategory_id(), page_request);
         }
-        product_id.iterator().forEachRemaining((t) -> {
-            System.out.print(t + " ");
-        });
-        System.out.println("");
         List<Product> products = repository.findAllWithCategoryAndImage(product_id, dto.getCategory_id());
-        products.iterator().forEachRemaining((t) -> {
-            System.out.print(t.getId());
-        });
-        System.out.println("");
         return mapper.ToResponseDTOList(products);
-//        return mapper.ToResponseDTOList(repository.findAll(dto.getName(), dto.getCategory_id(), dto.getFrom(), dto.getTo()));
     }
 
     public long countAll(boolean feature, List<Long> category_id) {
-        return repository.count(ProductSpecification.countAllWithCategoryIn(category_id).and(ProductSpecification.countAllFeatured(feature)));
+        if (feature) {
+            return repository.count(ProductSpecification.countAllWithCategoryIn(category_id).and(ProductSpecification.countAllFeatured(feature)));
+        }
+        return repository.count(ProductSpecification.countAllWithCategoryIn(category_id));
     }
 
 
@@ -104,14 +99,6 @@ public class ProductService implements ProductServiceInterface {
                 ProductCategory pc = new ProductCategory(p, c);
                 productCategoryRepository.save(pc);
                 p.addCategory(pc);
-            }
-        }
-        if (product_dto.images() != null) {
-            for (ImageDTO i : product_dto.images()) {
-                Image image = imageMapper.toEntity(i);
-                image.setProduct(p);
-//                image = imageRepository.save(image);
-                p.addImage(image);
             }
         }
         repository.save(p);
@@ -134,21 +121,6 @@ public class ProductService implements ProductServiceInterface {
         return mapper.ToResponseDTO(product);
     }
 
-    public ProductResponseDTO addImages(long product_id, ImageDTO[] images) {
-        Product p = repository.getReferenceById(product_id);
-        if (images.length != 0) {
-            for (ImageDTO i : images) {
-                if (!imageRepository.existsByName(i.name())) {
-                    Image image = imageMapper.toEntity(i);
-                    image.setProduct(p);
-                    p.addImage(image);
-                }
-            }
-            repository.save(p);
-        }
-        return mapper.ToResponseDTO(p);
-    }
-
     @Transactional(rollbackFor = {RuntimeException.class})
     public ProductResponseDTO removeCategories(long product_id, long[] category_id) {
         if (category_id.length != 0) {
@@ -160,23 +132,6 @@ public class ProductService implements ProductServiceInterface {
         return mapper.ToResponseDTO(repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException()));
     }
 
-    @Transactional(rollbackFor = {RuntimeException.class})
-    public ProductResponseDTO removeImages(long product_id, long[] images_id, boolean forced) {
-        Product p = repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException());
-        if (images_id.length != 0) {
-            for (long id : images_id) {
-                Image i = imageRepository.getReferenceById(id);
-                if (forced) {
-                    p.removeImage(i);
-                    imageRepository.hardDelete(id);
-                } else {
-                    imageRepository.delete(i);
-                }
-            }
-        }
-        return mapper.ToResponseDTO(p);
-    }
-
     public ProductResponseDTO update(ProductUpdateDTO product_dto) {
         Product p = repository.getReferenceById(product_dto.id());
         p.setName(product_dto.name());
@@ -184,13 +139,27 @@ public class ProductService implements ProductServiceInterface {
         p.setPrice(product_dto.price());
         p.setAmount(product_dto.amount());
         repository.save(p);
-//        p = repository.findById(p.getId()).orElseThrow(() -> new ResourceNotFoundException());
         return mapper.ToResponseDTO(p);
     }
 
     public void delete(long id, boolean forcedDelete) {
         if (repository.existsById(id)) {
-            repository.deleteById(id);
+            if (forcedDelete) {
+
+            } else {
+                repository.deleteById(id);
+            }
+        } else {
+            throw new EntityNotFoundException("No Product With this Id");
+        }
+    }
+
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public void restore(long id) {
+        if (repository.existsById(id)) {
+            repository.restoreProduct(id);
+        } else {
+            throw new EntityNotFoundException("No Product With this Id");
         }
     }
 

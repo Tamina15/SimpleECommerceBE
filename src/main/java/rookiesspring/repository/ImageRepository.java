@@ -17,8 +17,12 @@ import rookiesspring.model.Image;
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
     public boolean existsByName(String name);
-    
+
     @Query(value = "delete from Image i where i.id = :id")
     @Modifying()
-    public void hardDelete(@Param(value = "id")long id);
+    public void hardDelete(@Param(value = "id") long id);
+
+    @Query(value = "update Image i set i.deleted = false where i.id = :id")
+    @Modifying()
+    public void restore(@Param(value = "id") long id);
 }
