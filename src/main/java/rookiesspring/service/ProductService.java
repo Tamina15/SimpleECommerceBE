@@ -91,20 +91,27 @@ public class ProductService implements ProductServiceInterface {
     }
 
     public ProductResponseDTO save(ProductDTO product_dto) {
-        Product p = mapper.toEntity(product_dto);
-        p = repository.save(p);
-        if (product_dto.category_id() != null) {
-            for (long id : product_dto.category_id()) {
-                Category c = categoryRepository.getReferenceById(id);
-                ProductCategory pc = new ProductCategory(p, c);
-                productCategoryRepository.save(pc);
-                p.addCategory(pc);
-            }
-        }
-        repository.save(p);
-        return mapper.ToResponseDTO(p);
+        Product product = mapper.toEntity(product_dto);
+        product = repository.save(product);
+        return mapper.ToResponseDTO(product);
     }
 
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public ProductResponseDTO updateCategories(long product_id, long[] category_id) {
+        Product product = repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException());
+        Set<ProductCategory> set = new HashSet<>();
+        productCategoryRepository.deleteByProductId(product_id);
+        for (long id : category_id) {
+            if (categoryRepository.existsById(id)) {
+                Category category = categoryRepository.getReferenceById(id);
+                ProductCategory productCategory = new ProductCategory(product, category);
+                productCategoryRepository.save(productCategory);
+            }
+        }
+        return mapper.ToResponseDTO(product);
+    }
+
+    @Deprecated
     public ProductResponseDTO addCategories(long product_id, long[] category_id) {
         Product product = repository.getReferenceById(product_id);
         if (repository.existsById(product_id)) {
@@ -121,6 +128,7 @@ public class ProductService implements ProductServiceInterface {
         return mapper.ToResponseDTO(product);
     }
 
+    @Deprecated()
     @Transactional(rollbackFor = {RuntimeException.class})
     public ProductResponseDTO removeCategories(long product_id, long[] category_id) {
         if (category_id.length != 0) {

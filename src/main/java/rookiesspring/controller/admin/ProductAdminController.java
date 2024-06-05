@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.ProductDTO;
 import rookiesspring.dto.ProductRequestDTO;
+import rookiesspring.dto.ProductUpdateCategoryDTO;
 import rookiesspring.dto.RemoveImageDTO;
 import rookiesspring.dto.UploadImageDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
@@ -67,6 +68,11 @@ public class ProductAdminController {
         return ResponseEntity.ok(service.update(product));
     }
 
+    @PutMapping("/categories")
+    public ResponseEntity updateCategories(@Valid @RequestBody() ProductUpdateCategoryDTO dto) {
+        return ResponseEntity.ok().body(service.updateCategories(dto.getProduct_id(), dto.getCategory_id()));
+    }
+
     @PostMapping("/categories")
     public ResponseEntity addCategories(@RequestParam("product_id") long product_id, @RequestParam("category_id") long[] category_id) {
         return ResponseEntity.ok().body(service.addCategories(product_id, category_id));
@@ -99,7 +105,7 @@ public class ProductAdminController {
         service.delete(id, forcedDelete);
         return ResponseEntity.accepted().body(Util.message("Delete Successfully"));
     }
-    
+
     @PatchMapping("/{id}")
     public ResponseEntity restoreProduct(@PathVariable("id") long id) {
         service.restore(id);

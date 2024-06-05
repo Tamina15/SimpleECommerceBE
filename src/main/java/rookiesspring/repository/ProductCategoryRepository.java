@@ -30,4 +30,6 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
     public ProductCategory getReferenceByProductIdAndCategoryId(long pid, long cid);
 
     public boolean existsByProductIdAndCategoryId(long product_id, long category_id);
+    
+    public long[] findAllIdByProductId(long product_id);
 }
