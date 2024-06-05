@@ -22,7 +22,8 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
     @Modifying
     public void deleteByProductAndCategory(long product, long category);
 
-    public void deleteByProductIdAndCategoryId(long product, long category);
+    public void deleteByProductIdAndCategoryId(long product_id, long category_id);
+    public void deleteByProductId(long product_id);
 
     @Query(value = "select pc.id from ProductCategory pc where pc.product = ?1 and pc.category = ?2")
     public Optional<Long> findId(Product p, Category c);
