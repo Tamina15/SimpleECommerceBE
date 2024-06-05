@@ -19,15 +19,15 @@ import rookiesspring.model.UserDetail;
  * @author HP
  */
 
-@Mapper(componentModel = "spring")
-public interface UserUpdateMapper {
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateUserFromDto(UserUpdateDTO dto, @MappingTarget User entity);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateUserDetailFromDto(UserUpdateDTO dto, @MappingTarget UserDetail entity);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateUserAddressFromDto(UserUpdateDTO dto, @MappingTarget Address entity);
-}
+//@Mapper(componentModel = "spring")
+//public interface UserUpdateMapper {
+//
+//    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+//    void updateUserFromDto(UserUpdateDTO dto, @MappingTarget User entity);
+//
+//    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+//    void updateUserDetailFromDto(UserUpdateDTO dto, @MappingTarget UserDetail entity);
+//
+//    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+//    void updateUserAddressFromDto(UserUpdateDTO dto, @MappingTarget Address entity);
+//}
