@@ -118,11 +118,6 @@ public class CartService implements BaseServiceInterface {
         return orderMapper.ToResponseDTO(order);
     }
 
-    @Override
-    public boolean checkExist(long id) {
-        return repository.existsById(id);
-    }
-
     public boolean checkExist(long user_id, long product_id) {
         return repository.existsByUserIdAndProductId(user_id, product_id);
     }

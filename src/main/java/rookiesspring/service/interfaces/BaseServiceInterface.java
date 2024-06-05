@@ -9,5 +9,4 @@ package rookiesspring.service.interfaces;
  * @author HP
  */
 public interface BaseServiceInterface {
-    public boolean checkExist(long id);
 }

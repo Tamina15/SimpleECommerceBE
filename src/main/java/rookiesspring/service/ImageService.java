@@ -86,10 +86,4 @@ public class ImageService implements ImageServiceInterface {
         return mapper.ToResponseDTO(image);
     }
 
-    @Override
-    public boolean checkExist(long id
-    ) {
-        return false;
-    }
-
 }

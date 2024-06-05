@@ -107,7 +107,7 @@ public class ProductService implements ProductServiceInterface {
 
     public ProductResponseDTO addCategories(long product_id, long[] category_id) {
         Product product = repository.getReferenceById(product_id);
-        if (checkExist(product_id)) {
+        if (repository.existsById(product_id)) {
             for (long id : category_id) {
                 if (categoryRepository.existsById(id) && !productCategoryRepository.existsByProductIdAndCategoryId(product_id, id)) {
                     Category category = categoryRepository.getReferenceById(id);
@@ -161,11 +161,6 @@ public class ProductService implements ProductServiceInterface {
         } else {
             throw new EntityNotFoundException("No Product With this Id");
         }
-    }
-
-    @Override
-    public boolean checkExist(long id) {
-        return repository.existsById(id);
     }
 
 }

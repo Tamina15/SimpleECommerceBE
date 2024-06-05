@@ -121,12 +121,6 @@ public class UserService implements UserServiceInterface, UserDetailsService {
             throw new EntityNotFoundException();
         }
     }
-
-    @Override
-    public boolean checkExist(long id) {
-        return repository.existsById(id);
-    }
-
     public boolean checkExistEmail(String email) {
         return repository.existsByEmail(email);
     }

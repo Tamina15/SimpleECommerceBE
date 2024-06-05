@@ -89,7 +89,7 @@ public class CategoryService implements CategoryServiceInterface {
     }
 
     public void delete(long id) {
-        if (checkExist(id)) {
+        if (repository.existsById(id)) {
             repository.deleteById(id);
             Util.removeCategory(id);
         } else {
@@ -128,11 +128,6 @@ public class CategoryService implements CategoryServiceInterface {
 //            throw new EntityNotFoundException();
 //        }
 //    }
-
-    @Override
-    public boolean checkExist(long id) {
-        return repository.existsById(id);
-    }
 
     @Autowired
     public void setProductRepository(ProductRepository productRepository) {

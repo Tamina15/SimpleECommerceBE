@@ -101,7 +101,7 @@ public class OrderService implements OrderServiceInterface {
 
     @Deprecated
     public OrderResponseDTO update(OrderUpdateDTO dto) {
-        if (checkExist(dto.order_id())) {
+        if (repository.existsById(dto.order_id())) {
             Order o = repository.getReferenceById(dto.order_id());
             return mapper.ToResponseDTO(o);
         } else {
@@ -110,7 +110,7 @@ public class OrderService implements OrderServiceInterface {
     }
 
     public void delete(long id) {
-        if (checkExist(id)) {
+        if (repository.existsById(id)) {
             repository.deleteById(id);
         } else {
             throw new EntityNotFoundException();
@@ -119,7 +119,7 @@ public class OrderService implements OrderServiceInterface {
 
     @Transactional
     public OrderResponseDTO addProduct(OrderUpdateDTO dto) {
-        if (checkExist(dto.order_id())) {
+        if (repository.existsById(dto.order_id())) {
             Order o = repository.getReferenceById(dto.order_id());
             Product_Amount[] list = dto.products();
             if (list != null) {
@@ -140,7 +140,7 @@ public class OrderService implements OrderServiceInterface {
 
     @Transactional
     public OrderResponseDTO deleteProduct(OrderUpdateDTO dto) {
-        if (checkExist(dto.order_id())) {
+        if (repository.existsById(dto.order_id())) {
             Order o = repository.getReferenceById(dto.order_id());
             
             return mapper.ToResponseDTO(o);
@@ -150,7 +150,7 @@ public class OrderService implements OrderServiceInterface {
     }
 
     public OrderResponseDTO proccessOrder(long id) {
-        if (checkExist(id)) {
+        if (repository.existsById(id)) {
             Order o = repository.getReferenceById(id);
             if (o.isProcessed()) {
                 return mapper.ToResponseDTO(o);
@@ -174,10 +174,6 @@ public class OrderService implements OrderServiceInterface {
         }
     }
 
-    @Override
-    public boolean checkExist(long id) {
-        return repository.existsById(id);
-    }
 
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
