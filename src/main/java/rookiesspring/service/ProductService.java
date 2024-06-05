@@ -4,35 +4,26 @@
  */
 package rookiesspring.service;
 
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.HashSet;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Set;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rookiesspring.dto.ImageDTO;
 import rookiesspring.dto.ProductDTO;
 import rookiesspring.dto.ProductRequestDTO;
-import rookiesspring.dto.RateDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
-import rookiesspring.dto.response.RateResponseDTO;
 import rookiesspring.dto.update.ProductUpdateDTO;
 import rookiesspring.exception.ResourceNotFoundException;
-import rookiesspring.mapper.ImageMapper;
 import rookiesspring.mapper.ProductMapper;
 import rookiesspring.model.Category;
-import rookiesspring.model.Image;
 import rookiesspring.model.Product;
-import rookiesspring.model.Rate;
-import rookiesspring.model.User;
 import rookiesspring.model.composite_model.ProductCategory;
 import rookiesspring.repository.CategoryRepository;
-import rookiesspring.repository.ImageRepository;
 import rookiesspring.repository.ProductCategoryRepository;
 import rookiesspring.repository.ProductRepository;
-import rookiesspring.repository.RateRepository;
 import rookiesspring.service.interfaces.ProductServiceInterface;
 import rookiesspring.specification.ProductSpecification;
 import rookiesspring.util.Util;
@@ -45,20 +36,16 @@ import rookiesspring.util.Util;
 @Service
 public class ProductService implements ProductServiceInterface {
 
-    ProductRepository repository;
-    ProductMapper mapper;
-    @Autowired
-    CategoryRepository categoryRepository;
-    @Autowired
-    ImageMapper imageMapper;
-    @Autowired
-    ImageRepository imageRepository;
-    @Autowired
-    ProductCategoryRepository productCategoryRepository;
+    private final ProductRepository repository;
+    private final ProductMapper mapper;
+    private final CategoryRepository categoryRepository;
+    private final ProductCategoryRepository productCategoryRepository;
 
-    public ProductService(ProductRepository repository, ProductMapper mapper) {
+    public ProductService(ProductRepository repository, ProductMapper mapper, CategoryRepository categoryRepository, ProductCategoryRepository productCategoryRepository) {
         this.repository = repository;
         this.mapper = mapper;
+        this.categoryRepository = categoryRepository;
+        this.productCategoryRepository = productCategoryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -84,10 +71,9 @@ public class ProductService implements ProductServiceInterface {
         return repository.count(ProductSpecification.countAllWithCategoryIn(category_id));
     }
 
-
     public ProductResponseDTO findOneById(long id) {
-        Product p = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException());
-        return mapper.ToResponseDTO(p);
+        Product product = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException());
+        return mapper.ToResponseDTO(product);
     }
 
     public ProductResponseDTO save(ProductDTO product_dto) {
