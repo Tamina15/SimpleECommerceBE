@@ -10,8 +10,10 @@ import jakarta.validation.constraints.NotNull;
  *
  * @author HP
  */
-public record CategoryDTO(@NotNull(message = "Category Name must not be null")
-        String name, @NotNull(message = "Category Description must not be null")
+public record CategoryDTO(
+        @NotNull(message = "Category Name must not be null")
+        String name, 
+        @NotNull(message = "Category Description must not be null")
         String description, long[] product_id) {
 
 }

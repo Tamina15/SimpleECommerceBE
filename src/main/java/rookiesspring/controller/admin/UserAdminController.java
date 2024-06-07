@@ -60,12 +60,12 @@ public class UserAdminController {
     }
     
     @PostMapping("")
-    public ResponseEntity createUser(@RequestBody UserDTO newUser) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.save(newUser));
+    public ResponseEntity createUser(@Valid @RequestBody UserDTO newUser) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.saveAdmin(newUser));
     }
     
     @PutMapping("/")
-    public ResponseEntity changeUserInfomation(@RequestBody UserUpdateDTO user_dto) {
+    public ResponseEntity changeUserInfomation(@Valid @RequestBody UserUpdateDTO user_dto) {
         return ResponseEntity.ok(service.updateOne(user_dto));
     }
     

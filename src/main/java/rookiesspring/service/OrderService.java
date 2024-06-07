@@ -40,15 +40,18 @@ import rookiesspring.util.Util;
 @Service
 public class OrderService implements OrderServiceInterface {
 
-    OrderRepository repository;
-    OrderMapper mapper;
-    OrderDetailRepository orderDetailRepository;
-    UserRepository userRepository;
-    ProductRepository productRepository;
+    private OrderRepository repository;
+    private OrderDetailRepository orderDetailRepository;
+    private OrderMapper mapper;
+    private UserRepository userRepository;
+    private ProductRepository productRepository;
 
-    public OrderService(OrderRepository repository, OrderMapper mapper) {
+    public OrderService(OrderRepository repository, OrderDetailRepository orderDetailRepository, OrderMapper mapper, UserRepository userRepository, ProductRepository productRepository) {
         this.repository = repository;
+        this.orderDetailRepository = orderDetailRepository;
         this.mapper = mapper;
+        this.userRepository = userRepository;
+        this.productRepository = productRepository;
     }
 
     public List<OrderResponseDTOShort> findAll(LocalDateTime from, LocalDateTime to) {
@@ -184,12 +187,7 @@ public class OrderService implements OrderServiceInterface {
     public void setProductRepository(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
-
-    @Autowired
-    public void setOrderDetailRepository(OrderDetailRepository orderDetailRepository) {
-        this.orderDetailRepository = orderDetailRepository;
-    }
-
+//
 //    @EventListener(ApplicationReadyEvent.class)
 //    @Transactional
 //    public void doSomethingAfterStartup() {
@@ -205,4 +203,18 @@ public class OrderService implements OrderServiceInterface {
 //        }
 //    }
 
+//    @EventListener(ApplicationReadyEvent.class)
+//    @Transactional
+//    public void doSomethingAfterStartup() {
+//        List<Order> list = repository.findAll();
+//        for (Order o : list) {
+//            double price = 0;
+//            Set<Order_Detail> od = o.getDetails();
+//            for (Order_Detail d : od) {
+//                price += d.getProduct().getPrice() * d.getAmount();
+//            }
+//            o.setTotalPrice(String.format("%f", price));
+//            repository.save(o);
+//        }
+//    }
 }

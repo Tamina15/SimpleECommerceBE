@@ -32,7 +32,7 @@ import rookiesspring.model.composite_model.ProductCategory;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
+//@ToString
 @SQLDelete(sql = "UPDATE product SET deleted = true WHERE id=?")
 //@SQLRestriction(value = "deleted=false")
 public class Product extends AuditEntity<Long> {
@@ -125,6 +125,11 @@ public class Product extends AuditEntity<Long> {
 
     public void reduceAmount(int amount) {
         this.amount -= amount;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" + "name=" + name + ", description=" + description + ", price=" + price + ", feature=" + feature + ", amount=" + amount + ", rating=" + rating + ", total_count_rating=" + total_count_rating + '}';
     }
 
 }

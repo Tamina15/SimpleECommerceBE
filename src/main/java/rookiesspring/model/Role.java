@@ -19,6 +19,9 @@ public enum Role {
     }
 
     @Override
+    /**
+     * Return "ROLE_" + this role name. e.g: ROLE_USER
+     */
     public String toString() {
         return this.name;
     }

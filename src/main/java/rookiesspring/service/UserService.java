@@ -7,6 +7,7 @@ package rookiesspring.service;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Set;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +23,7 @@ import rookiesspring.dto.response.custom.UserPaginationShort;
 import rookiesspring.dto.response.custom.UserResponseDTOShort;
 import rookiesspring.dto.update.UserUpdateDTO;
 import rookiesspring.mapper.UserMapper;
+import rookiesspring.model.Role;
 import rookiesspring.model.User;
 import rookiesspring.repository.UserRepository;
 import rookiesspring.service.interfaces.UserServiceInterface;
@@ -33,15 +35,15 @@ import rookiesspring.service.interfaces.UserServiceInterface;
  */
 @Service
 public class UserService implements UserServiceInterface, UserDetailsService {
-    
+
     private UserRepository repository;
     private UserMapper mapper;
-    
+
     public UserService(UserRepository repository, UserMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
     }
-    
+
     public UserResponseDTOShort findById(Long userId) {
         return repository.findProjectedById(userId).orElseThrow(() -> new EntityNotFoundException());
     }
@@ -53,21 +55,20 @@ public class UserService implements UserServiceInterface, UserDetailsService {
         long count = repository.count();
         return new UserPaginationShort(users, count);
     }
-    
+
     public UserResponseDTO getUserInfo(Long userId) {
         return mapper.ToResponseDTO(repository.findById(userId).orElseThrow(() -> new EntityNotFoundException()));
     }
-    
-    @Deprecated
-    public UserResponseDTO save(UserDTO newUser) {
-        User u = mapper.toEntity(newUser);
-        try {
-            return mapper.ToResponseDTO(repository.save(u));
-        } catch (Exception e) {
-            throw new EntityExistsException();
+
+    public UserResponseDTO saveAdmin(UserDTO new_user) {
+        User user = mapper.toEntity(new_user);
+        user.setRoles(Set.of(Role.ADMIN.toString()));
+        if (repository.existsByEmail(new_user.email())) {
+            throw new EntityExistsException("Email has already Existed");
         }
+        return mapper.ToResponseDTO(repository.save(user));
     }
-    
+
     public UserResponseDTOShort updateOne(UserUpdateDTO user_dto) {
         User user = repository.findById(user_dto.id()).orElseThrow(() -> new EntityNotFoundException("No value present"));
         if (user_dto.email() != null) {
@@ -75,18 +76,11 @@ public class UserService implements UserServiceInterface, UserDetailsService {
                 throw new EntityExistsException("Email has already Existed");
             }
         }
-//        Address address = u.getUser_detail().getAddress();
-//        mapper.updateUserAddressFromDto(user_dto, address);
-//        UserDetail detail = u.getUser_detail();
-//        mapper.updateUserDetailFromDto(user_dto, detail);
-//        mapper.updateUserFromDto(user_dto, u);
-//        detail.setAddress(address);
-//        u.setUser_detail(detail);
         mapper.toUpdateUserFromDTO(user_dto, user);
         repository.save(user);
         return mapper.ToResponseDTOShort(user);
     }
-    
+
     @Transactional(rollbackFor = {RuntimeException.class})
     public void deleteById(RemoveUserDTO dto) {
         if (repository.existsById(dto.user_id())) {
@@ -99,7 +93,7 @@ public class UserService implements UserServiceInterface, UserDetailsService {
             throw new EntityNotFoundException();
         }
     }
-    
+
     @Transactional(rollbackFor = {RuntimeException.class})
     public UserResponseDTOShort blockOrUnblockUser(long user_id, boolean block) {
         User user = repository.findById(user_id).orElseThrow(() -> new EntityNotFoundException("No value present"));
@@ -107,6 +101,7 @@ public class UserService implements UserServiceInterface, UserDetailsService {
         repository.save(user);
         return mapper.ToResponseDTOShort(user);
     }
+
     @Transactional(rollbackFor = {RuntimeException.class})
     public void restoreUser(Long user_id) {
         if (repository.existsById(user_id)) {
@@ -115,18 +110,20 @@ public class UserService implements UserServiceInterface, UserDetailsService {
             throw new EntityNotFoundException();
         }
     }
-    
+
+    @Deprecated
     public boolean checkExistEmail(String email) {
         return repository.existsByEmail(email);
     }
-    
+
+    @Deprecated
     public boolean checkExistUsername(String username) {
         return repository.existsByUsername(username);
     }
-    
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("No User Found"));
     }
-    
+
 }

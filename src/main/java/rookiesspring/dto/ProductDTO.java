@@ -8,6 +8,6 @@ package rookiesspring.dto;
  *
  * @author HP
  */
-public record ProductDTO(String name, String description, double price, int amount, long[] category_id, ImageDTO[] images) {
+public record ProductDTO(String name, String description, double price, int amount, long[] category_id, boolean feature) {
 
 }

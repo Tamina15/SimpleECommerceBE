@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import rookiesspring.dto.LoginDTO;
 import rookiesspring.dto.UserDTO;
 import rookiesspring.dto.response.LoginResponseDTO;
-import rookiesspring.dto.response.UserResponseDTO;
 import rookiesspring.mapper.UserMapper;
 import rookiesspring.model.User;
 import rookiesspring.repository.UserRepository;

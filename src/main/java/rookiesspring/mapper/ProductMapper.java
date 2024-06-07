@@ -36,6 +36,7 @@ public class ProductMapper implements BaseMapper<Product, ProductDTO, ProductRes
         if (dto.amount() > 0) {
             product.setAmount(dto.amount());
         }
+        product.setFeature(dto.feature());
         product.setCategory(new HashSet<>());
         product.setImages(new HashSet<>());
         return product;

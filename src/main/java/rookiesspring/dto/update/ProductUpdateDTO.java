@@ -14,12 +14,15 @@ import jakarta.validation.constraints.Size;
  */
 public record ProductUpdateDTO(
         @NotNull(message = "Product Id cannot be null")
-        long id, 
+        long id,
+        @NotNull(message = "Product Name cannot be null")
         String name,
         @Size(max = 255, message = "Maximum Desciption length is 255")
         String description,
         @Min(value = 1, message = "Minimal Price is 1")
         double price,
         @Min(value = 1, message = "Minimal Amount is 1")
-        int amount) {
+        int amount,
+        boolean feature) {
+
 }

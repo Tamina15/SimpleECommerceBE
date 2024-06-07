@@ -45,12 +45,12 @@ public class OrderController {
         return ResponseEntity.ok(service.findAll(user_id, from, to));
     }
 
-    @GetMapping("/products")
-    public ResponseEntity getAllOrderWithProducts(Authentication auth, @RequestParam(name = "from", required = false) LocalDateTime from, @RequestParam(name = "to", required = false) LocalDateTime to) {
-        var user = (User) auth.getPrincipal();
-        long user_id = user.getId();
-        return ResponseEntity.ok(service.findAllFull(user_id, from, to));
-    }
+//    @GetMapping("/products")
+//    public ResponseEntity getAllOrderWithProducts(Authentication auth, @RequestParam(name = "from", required = false) LocalDateTime from, @RequestParam(name = "to", required = false) LocalDateTime to) {
+//        var user = (User) auth.getPrincipal();
+//        long user_id = user.getId();
+//        return ResponseEntity.ok(service.findAllFull(user_id, from, to));
+//    }
 
     @GetMapping("/products/{id}")
     public ResponseEntity getOrderByIdWithProducts(Authentication auth, @PathVariable("id") long order_id) {
@@ -59,12 +59,12 @@ public class OrderController {
         return ResponseEntity.ok(service.findByIdFull(user_id, order_id));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity getOrderById(Authentication auth, @PathVariable("id") long order_id) {
-        var user = (User) auth.getPrincipal();
-        long user_id = user.getId();
-        return ResponseEntity.ok(service.findById(user_id, order_id));
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity getOrderById(Authentication auth, @PathVariable("id") long order_id) {
+//        var user = (User) auth.getPrincipal();
+//        long user_id = user.getId();
+//        return ResponseEntity.ok(service.findById(user_id, order_id));
+//    }
 
     @PostMapping("/")
     public ResponseEntity createOrder(Authentication auth, @Valid @RequestBody OrderDTO order) {
@@ -74,24 +74,26 @@ public class OrderController {
     }
 
     /**
+     * This belongs to Admin
      * Change to process order, todo: check product amount, subtract product
      * amount, set processed = true
      *
      * @param order_id
      * @return
      */
-    @PutMapping("/{id}")
-    public ResponseEntity processOrder(@PathVariable("id") long order_id) {
-        return ResponseEntity.ok().body(service.proccessOrder(order_id));
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity processOrder(@PathVariable("id") long order_id) {
+//        return ResponseEntity.ok().body(service.proccessOrder(order_id));
+//    }
 
-    @PostMapping("/products")
-    public ResponseEntity addProduct(@RequestBody OrderUpdateDTO dto) {
-        return ResponseEntity.ok(service.addProduct(dto));
-    }
-
-    @DeleteMapping("/products")
-    public ResponseEntity deleteProduct(@RequestBody OrderUpdateDTO dto) {
-        return ResponseEntity.ok(service.deleteProduct(dto));
-    }
+    // This was move to cart
+//    @PostMapping("/products")
+//    public ResponseEntity addProduct(@RequestBody OrderUpdateDTO dto) {
+//        return ResponseEntity.ok(service.addProduct(dto));
+//    }
+//
+//    @DeleteMapping("/products")
+//    public ResponseEntity deleteProduct(@RequestBody OrderUpdateDTO dto) {
+//        return ResponseEntity.ok(service.deleteProduct(dto));
+//    }
 }

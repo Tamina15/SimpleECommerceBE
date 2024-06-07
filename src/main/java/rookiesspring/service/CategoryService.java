@@ -20,7 +20,6 @@ import rookiesspring.dto.update.CategoryUpdateDTO;
 import rookiesspring.mapper.CategoryMapper;
 import rookiesspring.model.Category;
 import rookiesspring.model.Product;
-import rookiesspring.model.Rate;
 import rookiesspring.model.composite_model.ProductCategory;
 import rookiesspring.repository.CategoryRepository;
 import rookiesspring.repository.ProductCategoryRepository;
@@ -40,29 +39,30 @@ public class CategoryService implements CategoryServiceInterface {
     CategoryRepository repository;
     CategoryMapper mapper;
     ProductRepository productRepository;
-    @Autowired
     ProductCategoryRepository productcategoryRepository;
 
-    public CategoryService(CategoryRepository repository, CategoryMapper mapper) {
+    public CategoryService(CategoryRepository repository, CategoryMapper mapper, ProductRepository productRepository, ProductCategoryRepository productcategoryRepository) {
         this.repository = repository;
         this.mapper = mapper;
+        this.productRepository = productRepository;
+        this.productcategoryRepository = productcategoryRepository;
     }
 
     public List<CategoryResponseDTOShort> findAll(String name) {
         return repository.findAllProjectedByNameContainsIgnoreCase(name);
     }
 
-    public CategoryResponseDTOShort findById(long id) {
-        return repository.findOneProjectedById(id).orElseThrow(() -> new EntityNotFoundException());
-    }
-
+//    public CategoryResponseDTOShort findById(long id) {
+//        return repository.findOneProjectedById(id).orElseThrow(() -> new EntityNotFoundException());
+//    }
 //    public List<CategoryResponseDTO> findAllFull(String name) {
 //        return mapper.ToResponseDTOList(repository.findAllByNameContainsIgnoreCase(name));
 //    }
 //
-//    public CategoryResponseDTO findByIdFull(long id) {
-//        return mapper.ToResponseDTO(repository.findById(id).orElseThrow(() -> new EntityNotFoundException()));
-//    }
+    public CategoryResponseDTO findById(long id) {
+        return mapper.ToResponseDTO(repository.findById(id).orElseThrow(() -> new EntityNotFoundException()));
+    }
+
     public CategoryResponseDTO save(CategoryDTO categoryDTO) {
         Category c = mapper.toEntity(categoryDTO);
         repository.save(c);
@@ -81,6 +81,7 @@ public class CategoryService implements CategoryServiceInterface {
     }
 
     public CategoryResponseDTOShort update(CategoryUpdateDTO categoryDTO) {
+        System.out.println(categoryDTO.toString());
         Category c = repository.getReferenceById(categoryDTO.id());
         c.setName(categoryDTO.name());
         c.setDescription(categoryDTO.description());
@@ -95,7 +96,6 @@ public class CategoryService implements CategoryServiceInterface {
         } else {
             throw new EntityNotFoundException("No Category exists");
         }
-
     }
 //
 //    public CategoryResponseDTO addProduct(long category_id, long[] product_ids) {
@@ -128,11 +128,6 @@ public class CategoryService implements CategoryServiceInterface {
 //            throw new EntityNotFoundException();
 //        }
 //    }
-
-    @Autowired
-    public void setProductRepository(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
 
     @EventListener(ApplicationReadyEvent.class)
     @Transactional

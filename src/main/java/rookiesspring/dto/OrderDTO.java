@@ -13,8 +13,6 @@ import rookiesspring.dto.update.Product_Amount;
  * @author HP
  */
 public record OrderDTO(
-        @NotNull(message = "User Id cannot be null")
-        long user_id,
         @NotEmpty(message = "Products cannot be empty")
         Product_Amount[] products) {
 
