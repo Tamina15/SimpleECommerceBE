@@ -5,6 +5,7 @@
 package rookiesspring.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import rookiesspring.dto.ProductDTO;
 import rookiesspring.dto.ProductRequestDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
+import rookiesspring.dto.response.custom.ProductResponseDTOShort;
 import rookiesspring.dto.update.ProductUpdateDTO;
 import rookiesspring.exception.ResourceNotFoundException;
 import rookiesspring.mapper.ProductMapper;
@@ -61,6 +63,16 @@ public class ProductService implements ProductServiceInterface {
             product_id = repository.findAllProductId(dto.getName(), dto.getFrom(), dto.getTo(), dto.getCategory_id(), page_request);
         }
         List<Product> products = repository.findAllWithCategoryAndImage(product_id, dto.getCategory_id());
+        return mapper.ToResponseDTOList(products);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductResponseDTO> findAllByIdIn(long[] product_id) {
+        List<Long> list = new ArrayList();
+        for (long l : product_id) {
+            list.add(l);
+        }
+        List<Product> products = repository.findAllByProductIdIn(list);
         return mapper.ToResponseDTOList(products);
     }
 
@@ -132,6 +144,7 @@ public class ProductService implements ProductServiceInterface {
         p.setDescription(product_dto.description());
         p.setPrice(product_dto.price());
         p.setAmount(product_dto.amount());
+        p.setFeature(product_dto.feature());
         repository.save(p);
         return mapper.ToResponseDTO(p);
     }

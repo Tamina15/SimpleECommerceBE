@@ -38,4 +38,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Modifying
     void addProduct(long order_id, long product_id, int amount);
 
+    public List<OrderResponseDTOShort> findAllProjectedByCreatedDateBetweenAndUserIdEquals(LocalDateTime from, LocalDateTime to, long user_id);
+
+    public List<Order> findAllByCreatedDateBetweenAndUserIdEquals(LocalDateTime from, LocalDateTime to, long user_id);
+
+    public Optional<OrderResponseDTOShort> findOneProjectedByIdAndUserIdEquals(long order_id, long user_id);
+
+    public Optional<Order> findByIdAndUserIdEquals(long user_id, long order_id);
+
 }

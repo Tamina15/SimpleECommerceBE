@@ -54,52 +54,50 @@ public class OrderService implements OrderServiceInterface {
         this.productRepository = productRepository;
     }
 
-    public List<OrderResponseDTOShort> findAll(LocalDateTime from, LocalDateTime to) {
+
+    public List<OrderResponseDTOShort> findAll(long user_id, LocalDateTime from, LocalDateTime to) {
         if (from == null) {
             from = Util.minDateTime;
         }
         if (to == null) {
             to = LocalDateTime.now();
         }
-        return repository.findAllProjectedByCreatedDateBetween(from, to);
+        return repository.findAllProjectedByCreatedDateBetweenAndUserIdEquals(from, to, user_id);
     }
 
-    public OrderResponseDTOShort findById(long id) {
-        return repository.findOneProjectedById(id).orElseThrow(() -> new EntityNotFoundException());
+    public OrderResponseDTOShort findById(long user_id, long order_id) {
+        return repository.findOneProjectedByIdAndUserIdEquals(order_id, user_id).orElseThrow(() -> new EntityNotFoundException());
     }
 
-    public List<OrderResponseDTO> findAllFull(LocalDateTime from, LocalDateTime to) {
+    public List<OrderResponseDTO> findAllFull(long user_id, LocalDateTime from, LocalDateTime to) {
         if (from == null) {
             from = Util.minDateTime;
         }
         if (to == null) {
             to = LocalDateTime.now();
         }
-        return mapper.ToResponseDTOList(repository.findAllByCreatedDateBetween(from, to));
+        return mapper.ToResponseDTOList(repository.findAllByCreatedDateBetweenAndUserIdEquals(from, to, user_id));
     }
 
-    public OrderResponseDTO findByIdFull(long id) {
-        return mapper.ToResponseDTO(repository.findById(id).orElseThrow(() -> new EntityNotFoundException()));
+    public OrderResponseDTO findByIdFull(long user_id, long order_id) {
+        return mapper.ToResponseDTO(repository.findByIdAndUserIdEquals(user_id, order_id).orElseThrow(() -> new EntityNotFoundException()));
     }
 
     @Transactional
-    public OrderResponseDTO save(OrderDTO order_dto) {
+    public OrderResponseDTO save(OrderDTO order_dto, long user_id) {
         Order o = mapper.toEntity(order_dto);
-        if (userRepository.existsById(order_dto.user_id())) {
-            User u = userRepository.getReferenceById(order_dto.user_id());
-            o.setUser(u);
-            // Add Product through OrderDetail
-            Product_Amount[] list = order_dto.products();
-            if (list != null) {
-                for (Product_Amount pa : list) {
-                    repository.addProduct(o.getId(), pa.product_id(), pa.amount());
-                }
+        User u = userRepository.getReferenceById(user_id);
+        o.setUser(u);
+        o = repository.save(o);
+        Product_Amount[] list = order_dto.products();
+        if (list != null) {
+            for (Product_Amount pa : list) {
+                repository.addProduct(o.getId(), pa.product_id(), pa.amount());
             }
-            o = repository.save(o);
-            return mapper.ToResponseDTO(o);
-        } else {
-            throw new EntityNotFoundException();
         }
+        Set<Order_Detail> set = new HashSet<>(orderDetailRepository.findAllByOrderId(o.getId()));
+        o.setDetails(set);
+        return mapper.ToResponseDTO(o);
     }
 
     @Deprecated
@@ -145,7 +143,7 @@ public class OrderService implements OrderServiceInterface {
     public OrderResponseDTO deleteProduct(OrderUpdateDTO dto) {
         if (repository.existsById(dto.order_id())) {
             Order o = repository.getReferenceById(dto.order_id());
-            
+
             return mapper.ToResponseDTO(o);
         } else {
             throw new EntityNotFoundException();
@@ -155,7 +153,7 @@ public class OrderService implements OrderServiceInterface {
     public OrderResponseDTO proccessOrder(long id) {
         if (repository.existsById(id)) {
             Order o = repository.getReferenceById(id);
-            if (o.isProcessed()) {
+            if(o.isProcessed()){
                 return mapper.ToResponseDTO(o);
             }
             double price = 0;
@@ -167,6 +165,8 @@ public class OrderService implements OrderServiceInterface {
                 } else {
                     throw new NotEnoughProductException("Product id " + p.getId() + ", name: " + p.getName() + " doesnt have enough quantity");
                 }
+                p.setAmount(d.getAmount() - d.getAmount());
+                productRepository.save(p);
             }
             o.setTotalPrice(String.format("%f", price));
             o.setProcessed(true);
