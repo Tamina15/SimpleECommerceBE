@@ -39,6 +39,10 @@ public class Util {
     }
 
     public static void removeCategory(long id) {
+        if (category_id.length <= 1) {
+            category_id = new long[0];
+            return;
+        }
         long[] new_array = new long[category_id.length - 1];
         int j = 0;
         for (int i = 0; i < category_id.length; i++) {

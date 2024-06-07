@@ -31,11 +31,9 @@ import static org.mockito.Mockito.doNothing;
 import rookiesspring.dto.ProductDTO;
 import rookiesspring.dto.ProductRequestDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
-import rookiesspring.dto.response.custom.CategoryResponseDTOShort;
 
 import rookiesspring.mapper.ProductMapper;
 
-import rookiesspring.model.Image;
 import rookiesspring.model.Product;
 
 import rookiesspring.repository.CategoryRepository;
@@ -45,7 +43,6 @@ import rookiesspring.repository.ProductRepository;
 import rookiesspring.util.Util;
 
 import static org.mockito.Mockito.when;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import rookiesspring.dto.update.ProductUpdateDTO;
@@ -101,8 +98,8 @@ public class ProductServiceTest {
         product.setCategory(new HashSet<>());
         product.setImages(new HashSet<>());
 
-        dto = new ProductDTO("Name 1", "Description 1", 1d, 1, new long[1]);
-        updateDTO = new ProductUpdateDTO(1, "Name 1", "Description 1", 2, 2);
+        dto = new ProductDTO("Name 1", "Description 1", 1d, 1, new long[1], false);
+        updateDTO = new ProductUpdateDTO(1, "Name 1", "Description 1", 2, 2, false);
     }
 
     @AfterEach
@@ -114,12 +111,12 @@ public class ProductServiceTest {
         List<Long> product_id = List.of(1l, 2l);
         long[] category_id = {};
         List<Product> products = List.of(product, new Product(2));
-        var dto1 = new ProductResponseDTO(1, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<CategoryResponseDTOShort>(), new HashSet<Image>(), Util.minDateTime, LocalDateTime.now(), false);
-        var dto2 = new ProductResponseDTO(2, "Name 2", "Description 2", 2, 2, "2", false, new HashSet<CategoryResponseDTOShort>(), new HashSet<Image>(), Util.minDateTime, LocalDateTime.now(), false);
+        var dto1 = new ProductResponseDTO(1, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<>(), new HashSet<>(), Util.minDateTime, LocalDateTime.now(), false);
+        var dto2 = new ProductResponseDTO(2, "Name 2", "Description 2", 2, 2, "2", false, new HashSet<>(), new HashSet<>(), Util.minDateTime, LocalDateTime.now(), false);
         ProductRequestDTO request = new ProductRequestDTO();
         when(repository.findAllProductId(Mockito.any(String.class), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class), Mockito.any(), Mockito.any(PageRequest.class))).thenReturn(product_id);
 //        when(repository.findAllFeaturedProductId(Mockito.any(String.class), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class), Mockito.any(), Mockito.any(PageRequest.class))).thenReturn(product_id);
-        when(repository.findAllWithCategoryAndImage(product_id, category_id)).thenReturn(products);
+//        when(repository.findAllWithCategoryAndImage(product_id, category_id)).thenReturn(products);
         when(mapper.ToResponseDTOList(Mockito.anyList())).thenReturn(List.of(dto1, dto2));
         List<ProductResponseDTO> response = service.findAll(request);
         assertThat(response).isNotNull();
@@ -138,9 +135,9 @@ public class ProductServiceTest {
     public void testFindOneById_shouldReturnProductResponseDTO() {
         Long id = 2l;
         product.setId(id);
-        var dto = new ProductResponseDTO(id, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<CategoryResponseDTOShort>(), new HashSet<Image>(), Util.minDateTime, LocalDateTime.now(), false);
+        var dto1 = new ProductResponseDTO(id, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<>(), new HashSet<>(), Util.minDateTime, LocalDateTime.now(), false);
         when(repository.findById(id)).thenReturn(Optional.of(product));
-        when(mapper.ToResponseDTO(Mockito.any(Product.class))).thenReturn(dto);
+        when(mapper.ToResponseDTO(Mockito.any(Product.class))).thenReturn(dto1);
         ProductResponseDTO response = service.findOneById(id);
         assertThat(response).isNotNull();
         assertThat(response.id()).isEqualTo(product.getId());
@@ -150,7 +147,7 @@ public class ProductServiceTest {
 
     @Test
     public void testSave_shouldReturnProduct() {
-        var response = new ProductResponseDTO(1, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<CategoryResponseDTOShort>(), new HashSet<Image>(), Util.minDateTime, LocalDateTime.now(), false);
+        var response = new ProductResponseDTO(1, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<>(), new HashSet<>(), Util.minDateTime, LocalDateTime.now(), false);
         when(mapper.toEntity(dto)).thenReturn(product);
         when(repository.save(product)).thenReturn(product);
         when(mapper.ToResponseDTO(product)).thenReturn(response);
@@ -160,7 +157,7 @@ public class ProductServiceTest {
 
     @Test
     public void testUpdate_shouldReturnProduct() {
-        var dto1 = new ProductResponseDTO(1, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<CategoryResponseDTOShort>(), new HashSet<Image>(), Util.minDateTime, LocalDateTime.now(), false);
+        var dto1 = new ProductResponseDTO(1, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<>(), new HashSet<>(), Util.minDateTime, LocalDateTime.now(), false);
         when(repository.getReferenceById(Mockito.any(Long.class))).thenReturn(product);
         when(repository.save(Mockito.any(Product.class))).thenReturn(product);
         when(mapper.ToResponseDTO(Mockito.any(Product.class))).thenReturn(dto1);
@@ -173,7 +170,7 @@ public class ProductServiceTest {
         Category category = new Category();
         category.setId(1l);
         ProductCategory productCategory = new ProductCategory(product, category);
-        var dto1 = new ProductResponseDTO(1, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<CategoryResponseDTOShort>(), new HashSet<Image>(), Util.minDateTime, LocalDateTime.now(), false);
+        var dto1 = new ProductResponseDTO(1, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<>(), new HashSet<>(), Util.minDateTime, LocalDateTime.now(), false);
         long[] category_id = {1, 2, 3};
         when(repository.findById(Mockito.any(Long.class))).thenReturn(Optional.of(product));
 //        when(repository.existsById(Mockito.any(Long.class))).thenReturn(true);

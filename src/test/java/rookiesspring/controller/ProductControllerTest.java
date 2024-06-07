@@ -4,7 +4,6 @@
  */
 package rookiesspring.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -31,7 +29,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import rookiesspring.dto.ProductRequestDTO;
 import static org.mockito.Mockito.when;
-import  org.mockito.Mockito;
+import org.mockito.Mockito;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import rookiesspring.dto.response.ProductResponseDTO;
 import rookiesspring.dto.response.custom.CategoryResponseDTOShort;
@@ -51,8 +50,10 @@ public class ProductControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
     @MockBean
     private ProductService service;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -85,8 +86,8 @@ public class ProductControllerTest {
         product.setCategory(new HashSet<>());
         product.setImages(new HashSet<>());
 
-        dto = new ProductDTO("Name 1", "Description 1", 1d, 1, new long[1]);
-        updateDTO = new ProductUpdateDTO(1, "Name 1", "Description 1", 2, 2);
+        dto = new ProductDTO("Name 1", "Description 1", 1d, 1, new long[1], false);
+        updateDTO = new ProductUpdateDTO(1, "Name 1", "Description 1", 2, 2, false);
         resquestDTO = new ProductRequestDTO();
         responseDTO = new ProductResponseDTO(1, "Name 1", "Description 1", 1, 1, "1", false, new HashSet<CategoryResponseDTOShort>(), new HashSet<Image>(), Util.minDateTime, LocalDateTime.now(), false);
     }

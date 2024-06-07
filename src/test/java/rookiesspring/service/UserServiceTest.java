@@ -14,8 +14,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -125,13 +123,11 @@ public class UserServiceTest {
     public void testUpdateOne_shouldReturnUser() {
         when(repository.findById(Mockito.any(Long.class))).thenReturn(Optional.ofNullable(user));
         when(repository.existsByEmail(Mockito.anyString())).thenReturn(false);
-        when(repository.existsByEmail(Mockito.anyString())).thenReturn(true).thenThrow(EntityExistsException.class);
         doNothing().when(mapper).toUpdateUserFromDTO(updateDTO, user);
         when(repository.save(Mockito.any(User.class))).thenReturn(user);
         when(mapper.ToResponseDTOShort(Mockito.any(User.class))).thenReturn(responseShort);
         UserResponseDTOShort result = service.updateOne(updateDTO);
         assertThat(result).isNotNull();
-
     }
 
     @Test
@@ -158,20 +154,52 @@ public class UserServiceTest {
             service.deleteById(remove_soft);
         });
     }
+
     @Test
-    public void testRestoreUser() {
+    public void testBlockOrUnblockUser_shouldReturnUser() {
+        User nonblockUser = new User(1); // Should be lock after test
+        nonblockUser.setBlock(false);
+
+        User blockedUser = new User(2); // Should be un-lock after test
+        blockedUser.setBlock(true);
+
+        when(repository.findById(1l)).thenReturn(Optional.ofNullable(nonblockUser));
+        when(repository.findById(2l)).thenReturn(Optional.ofNullable(blockedUser));
+
+        // When block
+        when(repository.save(nonblockUser)).thenReturn(nonblockUser).thenAnswer((invocation) -> {
+            var u = (User) invocation.getArgument(0);
+            assertThat(u.isBlock()).isTrue();
+            return nonblockUser;
+        });
+
+        //When unblock
+        when(repository.save(blockedUser)).thenReturn(blockedUser).thenAnswer((invocation) -> {
+            var u = (User) invocation.getArgument(0);
+            assertThat(u.isBlock()).isFalse();
+            return blockedUser;
+        });
+        
+        // This would invalidate changes
+        when(mapper.ToResponseDTOShort(Mockito.any(User.class))).thenReturn(responseShort);
+
+        UserResponseDTOShort block_user = service.blockOrUnblockUser(1, true);
+        UserResponseDTOShort unblock_user = service.blockOrUnblockUser(2, false);
     }
 
     @Test
-    public void testCheckExistEmail() {
+    public void testRestoreUser_shouldReturnNothing() {
+        when(repository.existsById(Mockito.anyLong())).thenReturn(true);
+        doNothing().when(repository).restoreUser(Mockito.anyLong());
+        Assertions.assertAll(() -> {service.restoreUser(1l);});
     }
-
     @Test
-    public void testCheckExistUsername() {
-    }
-
-    @Test
-    public void testLoadUserByUsername() {
+    public void testRestoreUser_shouldThrowException() {
+        when(repository.existsById(Mockito.anyLong())).thenThrow(EntityNotFoundException.class);
+        Exception exception = Assertions.assertThrows(EntityNotFoundException.class, () -> {
+            service.restoreUser(1l);
+        });
+        assertThat(exception.getMessage()).isNull();
     }
 
 }
