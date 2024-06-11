@@ -9,6 +9,6 @@ package rookiesspring.dto.response.custom;
  * @author HP
  * @author Tamina
  */
-public record ProductResponseDTOShort(long id, String name, double price, int amount, String rating) {
+public record ProductResponseDTOShort(long id, String name, String description, double price, int amount, String rating) {
 
 }

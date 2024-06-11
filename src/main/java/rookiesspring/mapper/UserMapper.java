@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import rookiesspring.dto.UserDTO;
 import rookiesspring.dto.response.UserResponseDTO;
 import rookiesspring.dto.response.custom.UserResponseDTOShort;
+import rookiesspring.dto.update.UserUpdateDTO;
 import rookiesspring.model.Address;
 import rookiesspring.model.User;
 import rookiesspring.model.UserDetail;
@@ -48,7 +49,7 @@ public class UserMapper implements BaseMapper<User, UserDTO, UserResponseDTO> {
     @Override
     public UserResponseDTO ToResponseDTO(User e) {
         UserDetail d = e.getUser_detail();
-        UserResponseDTO u = new UserResponseDTO(e.getId(), e.getUsername(), e.getEmail(), d.isGender(), d.getAge(), d.getPhone(), e.getOrders(), d.getAddress());
+        UserResponseDTO u = new UserResponseDTO(e.getId(), e.getUserName(), e.getEmail(), d.isGender(), d.getAge(), d.getPhone(), e.getOrders(), d.getAddress(), e.getRoles());
         return u;
     }
 
@@ -63,7 +64,64 @@ public class UserMapper implements BaseMapper<User, UserDTO, UserResponseDTO> {
     }
 
     public UserResponseDTOShort ToResponseDTOShort(User e) {
-        UserResponseDTOShort u = new UserResponseDTOShort(e.getId(), e.getUsername(), e.getEmail());
+        UserResponseDTOShort u = new UserResponseDTOShort(e.getId(), e.getUserName(), e.getEmail(), e.isBlocked(), e.isDeleted(), e.getRoles());
         return u;
+    }
+
+    public List<UserResponseDTOShort> ToResponseDTOShortList(List<User> users) {
+        List<UserResponseDTOShort> list = new ArrayList<>();
+        for (User e : users) {
+            UserResponseDTOShort u = new UserResponseDTOShort(e.getId(), e.getUserName(), e.getEmail(), e.isBlocked(), e.isDeleted(), e.getRoles());
+            list.add(u);
+        }
+        return list;
+    }
+
+    public void toUpdateUserFromDTO(UserUpdateDTO dto, User entity) {
+        if (dto == null) {
+            return;
+        }
+        if (dto.email() != null) {
+            entity.setEmail(dto.email());
+        }
+        if (dto.username() != null) {
+            entity.setUsername(dto.username());
+        }
+        UserDetail detail = entity.getUser_detail();
+        if (dto.firstname() != null) {
+            detail.setFirstname(dto.firstname());
+        }
+        if (dto.lastname() != null) {
+            detail.setLastname(dto.lastname());
+        }
+        detail.setGender(dto.gender());
+        detail.setAge(dto.age());
+        if (dto.phone() != null) {
+            detail.setPhone(dto.phone());
+        }
+        Address address = detail.getAddress();
+        if (dto.address_number() != null) {
+            address.setAddress_number(dto.address_number());
+        }
+        if (dto.street() != null) {
+            address.setStreet(dto.street());
+        }
+        if (dto.ward() != null) {
+            address.setWard(dto.ward());
+        }
+        if (dto.district() != null) {
+            address.setDistrict(dto.district());
+        }
+        if (dto.city() != null) {
+            address.setCity(dto.city());
+        }
+        if (dto.province() != null) {
+            address.setProvince(dto.province());
+        }
+        if (dto.country() != null) {
+            address.setCountry(dto.country());
+        }
+        detail.setAddress(address);
+        entity.setUser_detail(detail);
     }
 }

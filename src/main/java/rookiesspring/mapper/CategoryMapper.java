@@ -5,7 +5,9 @@
 package rookiesspring.mapper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rookiesspring.dto.CategoryDTO;
@@ -13,6 +15,8 @@ import rookiesspring.dto.response.CategoryResponseDTO;
 import rookiesspring.dto.response.custom.CategoryResponseDTOShort;
 import rookiesspring.dto.response.custom.ProductResponseDTOShort;
 import rookiesspring.model.Category;
+import rookiesspring.model.Product;
+import rookiesspring.model.composite_model.ProductCategory;
 
 /**
  *
@@ -34,11 +38,17 @@ public class CategoryMapper implements BaseMapper<Category, CategoryDTO, Categor
 
     @Override
     public CategoryResponseDTO ToResponseDTO(Category e) {
+        Set<Product> set = new HashSet<>();
+        if (e.getProducts() != null) {
+            for (ProductCategory pc : e.getProducts()) {
+                set.add(pc.getProduct());
+            }
+        }
         List<ProductResponseDTOShort> p = new ArrayList<>();
         if (e.getProducts() != null) {
-            p.addAll(productMapper.ToResponseDTOShortList(e.getProducts()));
+            p.addAll(productMapper.ToResponseDTOShortList(set));
         }
-        CategoryResponseDTO c = new CategoryResponseDTO(e.getId(), e.getName(), e.getDescription(), p);
+        CategoryResponseDTO c = new CategoryResponseDTO(e.getId(), e.getName(), e.getDescription(), p, e.isDeleted());
         return c;
     }
 

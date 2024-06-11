@@ -4,8 +4,10 @@
  */
 package rookiesspring.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,11 +15,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.CartDTO;
-import rookiesspring.dto.UserDTO;
+import rookiesspring.dto.RemoveUserDTO;
 import rookiesspring.dto.update.UserUpdateDTO;
+import rookiesspring.model.User;
 import rookiesspring.service.CartService;
 import rookiesspring.service.UserService;
 import rookiesspring.util.Util;
@@ -28,8 +30,7 @@ import rookiesspring.util.Util;
  * @author Tamina
  */
 @RestController
-@RequestMapping("/user")
-
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private UserService service;
@@ -40,55 +41,42 @@ public class UserController {
         this.cartService = cartService;
     }
 
-    @GetMapping({"", "/", "/all"})
-    public ResponseEntity getAllUsers(@RequestParam(value = "username", required = false) String username) {
-        return ResponseEntity.ok(service.findAllByUsername(username));
+    @GetMapping("/info")
+    public ResponseEntity getUserInfomation(Authentication auth) {
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
+        return ResponseEntity.ok(service.getUserInfo(user_id));
     }
 
-    @GetMapping("/full")
-    public ResponseEntity getAllUsersFull(@RequestParam(value = "username", required = false) String username) {
-        return ResponseEntity.ok(service.findAllFull(username));
-    }
-
-    @GetMapping("/full/{id}")
-    public ResponseEntity getUserFull(@PathVariable(value = "id") Long userId) {
-        return ResponseEntity.ok(service.findByIdFull(userId));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity getUser(@PathVariable(value = "id") Long userId) {
-        return ResponseEntity.ok(service.findById(userId));
-    }
-
-    @PostMapping({"", "/"})
-    public ResponseEntity createUser(@RequestBody UserDTO newUser) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.save(newUser));
-    }
-
-    @PutMapping({"", "/"})
+    @PutMapping("/")
     public ResponseEntity changeUserInfomation(@RequestBody UserUpdateDTO user_dto) {
         return ResponseEntity.ok(service.updateOne(user_dto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity DeleteUser(@PathVariable(value = "id") Long id) {
-        service.deleteById(id);
+    @DeleteMapping("")
+    public ResponseEntity DeleteUser(@Valid @RequestBody() RemoveUserDTO remove_user_dto) {
+        service.deleteById(remove_user_dto);
         return ResponseEntity.accepted().body(Util.message("Delete Successfully"));
     }
 
-    // cart
-    @PutMapping("/cart")
-    public ResponseEntity addToCart(@RequestBody() CartDTO cart) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cartService.addToCart(cart));
+    @PutMapping("/carts")
+    public ResponseEntity addToCart(@RequestBody() CartDTO cart_dto, Authentication auth) {
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
+        return ResponseEntity.status(HttpStatus.CREATED).body(cartService.addToCart(user_id, cart_dto));
     }
 
-    @DeleteMapping("/cart")
-    public ResponseEntity removefromCart(@RequestBody() CartDTO cart) {
-        return ResponseEntity.accepted().body(cartService.removefromCart(cart));
+    @DeleteMapping("/carts")
+    public ResponseEntity removeFromCart(@RequestBody() CartDTO cart_dto, Authentication auth) {
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
+        return ResponseEntity.accepted().body(cartService.removefromCart(user_id, cart_dto));
     }
 
-    @PostMapping("/cart/{id}")
-    public ResponseEntity buy(@PathVariable(value = "id") Long user_id) {
+    @PostMapping("/carts")
+    public ResponseEntity buy(Authentication auth) {
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
         return ResponseEntity.status(HttpStatus.OK).body(cartService.buy(user_id));
     }
 

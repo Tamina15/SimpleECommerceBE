@@ -52,9 +52,4 @@ public class SupplierService implements SupplierServiceInterface {
         return mapper.ToResponseDTO(repository.findById(id).orElseThrow());
     }
 
-    @Override
-    public boolean checkExist(long id) {
-        return repository.existsById(id);
-    }
-
 }

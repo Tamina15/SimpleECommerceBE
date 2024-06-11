@@ -4,16 +4,19 @@
  */
 package rookiesspring.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jdk.jshell.spi.ExecutionControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import rookiesspring.util.Util;
 
 /**
  *
@@ -21,7 +24,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * @author Tamina
  */
 @ControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+//public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler {
 
     public ResponseEntity buildException(Integer errorCode, String message) {
         var error = ErrorResponse.builder().code(errorCode).message(message).build();
@@ -40,18 +44,38 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({EntityExistsException.class})
-    public ResponseEntity handleEntityExistsException(RuntimeException e) {
+    public ResponseEntity handleEntityExistsException(EntityExistsException e) {
         return buildException(HttpStatus.CONFLICT.value(), e.getMessage() != null ? e.getMessage() : "Entity Already Exist");
     }
 
     @ExceptionHandler({NotEnoughProductException.class})
-    public ResponseEntity handleNotEnoughProductException(RuntimeException e) {
-        return buildException(HttpStatus.CONFLICT.value(), e.getMessage() != null ? e.getMessage() : "Entity Already Exist");
+    public ResponseEntity handleNotEnoughProductException(NotEnoughProductException e) {
+        return buildException(HttpStatus.CONFLICT.value(), e.getMessage() != null ? e.getStackTrace()[0].toString() : "Not Enough Product");
+    }
+    
+    @ExceptionHandler({EmptyCartException.class})
+    public ResponseEntity handleEmptyCartException(EmptyCartException e) {
+        return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? e.getStackTrace()[0].toString() : "Not Enough Product");
     }
 
     @ExceptionHandler({UnsupportedOperationException.class})
-    public ResponseEntity handleUnsupportedOperationException(RuntimeException e) {
-        return buildException(HttpStatus.NOT_IMPLEMENTED.value(), e.getMessage() != null ? e.getMessage() : "Function Not Yet Implemented. Please Comeback Later");
+    public ResponseEntity handleUnsupportedOperationException(UnsupportedOperationException e) {
+        return buildException(HttpStatus.NOT_IMPLEMENTED.value(), e.getMessage() != null ? e.getStackTrace()[0].toString() : "Function Not Yet Implemented. Please Comeback Later");
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity handleValidationExceptions(MethodArgumentNotValidException e) {
+        return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getBindingResult().getAllErrors().get(0).getDefaultMessage()) : "Invalid Parameter");
+    }
+    
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity handleBadRequestExceptions(BadRequestException e) {
+        return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getStackTrace()[0].toString()) : "Bad Request");
+    }
+    
+    @ExceptionHandler({MalformedJwtException.class, ExpiredJwtException.class})
+    public ResponseEntity handleMalformedJwtExceptions(JwtException e) {
+        return buildException(HttpStatus.FORBIDDEN.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getMessage()) : "Malformed JWT Token");
     }
 
 }

@@ -4,8 +4,10 @@
  */
 package rookiesspring.controller;
 
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rookiesspring.dto.OrderDTO;
 import rookiesspring.dto.update.OrderUpdateDTO;
+import rookiesspring.model.User;
 import rookiesspring.service.OrderService;
 import rookiesspring.util.Util;
 
@@ -26,7 +29,7 @@ import rookiesspring.util.Util;
  * @author Tamina
  */
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/api/v1/orders")
 public class OrderController {
 
     OrderService service;
@@ -36,55 +39,61 @@ public class OrderController {
     }
 
     @GetMapping({"", "/"})
-    public ResponseEntity getAllOrder(@RequestParam(name = "from", required = false) LocalDateTime from, @RequestParam(name = "to", required = false) LocalDateTime to) {
-        return ResponseEntity.ok(service.findAll(from, to));
+    public ResponseEntity getAllOrder(Authentication auth, @RequestParam(name = "from", required = false) LocalDateTime from, @RequestParam(name = "to", required = false) LocalDateTime to) {
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
+        return ResponseEntity.ok(service.findAll(user_id, from, to));
     }
 
-    @GetMapping("/full")
-    public ResponseEntity getAllOrderFull(@RequestParam(name = "from", required = false) LocalDateTime from, @RequestParam(name = "to", required = false) LocalDateTime to) {
-        return ResponseEntity.ok(service.findAllFull(from, to));
+//    @GetMapping("/products")
+//    public ResponseEntity getAllOrderWithProducts(Authentication auth, @RequestParam(name = "from", required = false) LocalDateTime from, @RequestParam(name = "to", required = false) LocalDateTime to) {
+//        var user = (User) auth.getPrincipal();
+//        long user_id = user.getId();
+//        return ResponseEntity.ok(service.findAllFull(user_id, from, to));
+//    }
+
+    @GetMapping("/products/{id}")
+    public ResponseEntity getOrderByIdWithProducts(Authentication auth, @PathVariable("id") long order_id) {
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
+        return ResponseEntity.ok(service.findByIdFull(user_id, order_id));
     }
 
-    @GetMapping("/full/{id}")
-    public ResponseEntity getOrderByIdFull(@PathVariable("id") long id) {
-        return ResponseEntity.ok(service.findByIdFull(id));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity getOrderByIdShort(@PathVariable("id") long id) {
-        return ResponseEntity.ok(service.findById(id));
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity getOrderById(Authentication auth, @PathVariable("id") long order_id) {
+//        var user = (User) auth.getPrincipal();
+//        long user_id = user.getId();
+//        return ResponseEntity.ok(service.findById(user_id, order_id));
+//    }
 
     @PostMapping("/")
-    public ResponseEntity createOrder(@RequestBody OrderDTO order) {
-        return ResponseEntity.ok(service.save(order));
+    public ResponseEntity createOrder(Authentication auth, @Valid @RequestBody OrderDTO order) {
+        var user = (User) auth.getPrincipal();
+        long user_id = user.getId();
+        return ResponseEntity.ok(service.save(order, user_id));
     }
 
     /**
+     * This belongs to Admin
      * Change to process order, todo: check product amount, subtract product
      * amount, set processed = true
      *
-     * @param id
+     * @param order_id
      * @return
      */
-    @PutMapping("/{id}")
-    public ResponseEntity processOrder(@PathVariable("id") long id) {
-        return ResponseEntity.ok().body(service.proccessOrder(id));
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity processOrder(@PathVariable("id") long order_id) {
+//        return ResponseEntity.ok().body(service.proccessOrder(order_id));
+//    }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity deleteOrder(@PathVariable("id") long id) {
-        service.delete(id);
-        return ResponseEntity.ok().body(Util.message("Delete Succesfully"));
-    }
-
-    @PostMapping("/product")
-    public ResponseEntity addProduct(@RequestBody OrderUpdateDTO dto) {
-        return ResponseEntity.ok(service.addProduct(dto));
-    }
-
-    @DeleteMapping("/product")
-    public ResponseEntity deleteProduct(@RequestBody OrderUpdateDTO dto) {
-        return ResponseEntity.ok(service.deleteProduct(dto));
-    }
+    // This was move to cart
+//    @PostMapping("/products")
+//    public ResponseEntity addProduct(@RequestBody OrderUpdateDTO dto) {
+//        return ResponseEntity.ok(service.addProduct(dto));
+//    }
+//
+//    @DeleteMapping("/products")
+//    public ResponseEntity deleteProduct(@RequestBody OrderUpdateDTO dto) {
+//        return ResponseEntity.ok(service.deleteProduct(dto));
+//    }
 }

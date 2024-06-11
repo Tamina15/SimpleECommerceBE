@@ -4,10 +4,16 @@
  */
 package rookiesspring.dto.update;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 /**
  *
  * @author HP
  */
-public record Product_Amount(long product_id, int amount) {
-
+public record Product_Amount(
+        @NotNull(message = "Product cannot be null")
+        long product_id, 
+        @Min(value = 1, message = "Minimal amount is 1")
+        int amount) {
 }

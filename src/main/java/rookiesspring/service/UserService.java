@@ -6,23 +6,30 @@ package rookiesspring.service;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import rookiesspring.dto.CartDTO;
+import org.springframework.transaction.annotation.Transactional;
+import rookiesspring.dto.RemoveUserDTO;
 import rookiesspring.dto.UserDTO;
+import rookiesspring.dto.UserRequestDTO;
 import rookiesspring.dto.response.UserResponseDTO;
+import rookiesspring.dto.response.custom.UserPaginationShort;
 import rookiesspring.dto.response.custom.UserResponseDTOShort;
 import rookiesspring.dto.update.UserUpdateDTO;
 import rookiesspring.mapper.UserMapper;
-import rookiesspring.mapper.UserUpdateMapper;
-import rookiesspring.model.Address;
-import rookiesspring.model.Cart;
+import rookiesspring.model.Role;
 import rookiesspring.model.User;
-import rookiesspring.model.UserDetail;
-import rookiesspring.repository.CartRepository;
 import rookiesspring.repository.UserRepository;
 import rookiesspring.service.interfaces.UserServiceInterface;
+import rookiesspring.specification.UserSpecification;
 
 /**
  *
@@ -30,12 +37,10 @@ import rookiesspring.service.interfaces.UserServiceInterface;
  * @author Tamina
  */
 @Service
-public class UserService implements UserServiceInterface {
+public class UserService implements UserServiceInterface, UserDetailsService {
 
     private UserRepository repository;
     private UserMapper mapper;
-    @Autowired
-    private UserUpdateMapper updateMapper;
 
     public UserService(UserRepository repository, UserMapper mapper) {
         this.repository = repository;
@@ -46,72 +51,91 @@ public class UserService implements UserServiceInterface {
         return repository.findProjectedById(userId).orElseThrow(() -> new EntityNotFoundException());
     }
 
-    public List<UserResponseDTOShort> findAllByUsername(String username) {
-        if (username == null) {
-            username = "";
-        }
-        return repository.findAllProjectedByUsernameContainsIgnoreCase(username);
+    @Transactional(readOnly = true)
+    public UserPaginationShort findAllUser(UserRequestDTO dto) {
+        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrderBy()), dto.getSortBy()));
+        List<UserResponseDTOShort> users = repository.findAllProjectedBy(page_request);
+        long count = repository.count();
+        return new UserPaginationShort(users, count);
     }
 
-    public List<UserResponseDTO> findAllFull(String username) {
-        if (username == null) {
-            username = "";
-        }
-        return mapper.ToResponseDTOList(repository.findAll(username));
+    @Transactional(readOnly = true)
+    public UserPaginationShort findAllUser_v2(UserRequestDTO dto) {
+        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrderBy()), dto.getSortBy()));
+        Page<User> users = repository.findAll(UserSpecification.filterSpecs(dto.getUsername(), dto.getEmail(), dto.isBlocked(), dto.getFrom(), dto.getTo()), page_request);
+        List<UserResponseDTOShort> list = mapper.ToResponseDTOShortList(users.toList());
+        long count = users.getTotalElements();
+        return new UserPaginationShort(list, count);
     }
 
-    public UserResponseDTO findByIdFull(Long userId) {
+    public UserResponseDTO getUserInfo(Long userId) {
         return mapper.ToResponseDTO(repository.findById(userId).orElseThrow(() -> new EntityNotFoundException()));
     }
 
-    public UserResponseDTO save(UserDTO newUser) {
-        User u = mapper.toEntity(newUser);
-        try {
-            return mapper.ToResponseDTO(repository.save(u));
-        } catch (Exception e) {
-            throw new EntityExistsException();
+    public UserResponseDTO saveAdmin(UserDTO new_user) {
+        User user = mapper.toEntity(new_user);
+        user.setRoles(Set.of(Role.ADMIN.toString()));
+        if (repository.existsByEmail(new_user.email())) {
+            throw new EntityExistsException("Email has already Existed");
         }
+        return mapper.ToResponseDTO(repository.save(user));
     }
-// doing
 
     public UserResponseDTOShort updateOne(UserUpdateDTO user_dto) {
-        if (checkExist(user_dto.id())) {
-            User u = repository.getReferenceById(user_dto.id());
-            if (user_dto.email() != null) {
-                if (checkExistEmail(user_dto.email())) {
-                    throw new EntityExistsException("Email has already Exists");
-                }
-
+        User user = repository.findById(user_dto.id()).orElseThrow(() -> new EntityNotFoundException("No value present"));
+        if (user_dto.email() != null) {
+            if (checkExistEmail(user_dto.email())) {
+                throw new EntityExistsException("Email has already Existed");
             }
-            Address address = new Address();
-            updateMapper.updateUserAddressFromDto(user_dto, address);
-            UserDetail detail = new UserDetail();
-            updateMapper.updateUserDetailFromDto(user_dto, detail);
-            updateMapper.updateUserFromDto(user_dto, u);
-            detail.setAddress(address);
-            u.setUser_detail(detail);
-
-            repository.save(u);
-            return mapper.ToResponseDTOShort(u);
-        } else {
-            throw new EntityNotFoundException("No value present");
         }
+        mapper.toUpdateUserFromDTO(user_dto, user);
+        repository.save(user);
+        return mapper.ToResponseDTOShort(user);
     }
 
-    public void deleteById(long id) {
-        if (checkExist(id)) {
-            repository.deleteById(id);
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public void deleteById(RemoveUserDTO dto) {
+        if (repository.existsById(dto.user_id())) {
+            if (dto.hard()) {
+                repository.deleteById(dto.user_id());
+            } else {
+                repository.softDeleteById(dto.user_id());
+            }
         } else {
             throw new EntityNotFoundException();
         }
     }
 
-    @Override
-    public boolean checkExist(long id) {
-        return repository.existsById(id);
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public UserResponseDTOShort blockOrUnblockUser(long user_id, boolean block) {
+        User user = repository.findById(user_id).orElseThrow(() -> new EntityNotFoundException("No value present"));
+        user.setBlocked(block);
+        repository.save(user);
+        return mapper.ToResponseDTOShort(user);
     }
 
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public void restoreUser(Long user_id) {
+        if (repository.existsById(user_id)) {
+            repository.restoreUser(user_id);
+        } else {
+            throw new EntityNotFoundException();
+        }
+    }
+
+    @Deprecated
     public boolean checkExistEmail(String email) {
         return repository.existsByEmail(email);
     }
+
+    @Deprecated
+    public boolean checkExistUsername(String username) {
+        return repository.existsByUsername(username);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return repository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("No User Found"));
+    }
+
 }

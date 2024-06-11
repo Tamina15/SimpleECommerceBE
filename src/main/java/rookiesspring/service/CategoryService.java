@@ -5,8 +5,13 @@
 package rookiesspring.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import rookiesspring.dto.CategoryDTO;
 import rookiesspring.dto.response.CategoryResponseDTO;
@@ -15,9 +20,12 @@ import rookiesspring.dto.update.CategoryUpdateDTO;
 import rookiesspring.mapper.CategoryMapper;
 import rookiesspring.model.Category;
 import rookiesspring.model.Product;
+import rookiesspring.model.composite_model.ProductCategory;
 import rookiesspring.repository.CategoryRepository;
+import rookiesspring.repository.ProductCategoryRepository;
 import rookiesspring.repository.ProductRepository;
 import rookiesspring.service.interfaces.CategoryServiceInterface;
+import rookiesspring.util.Util;
 
 /**
  *
@@ -31,90 +39,101 @@ public class CategoryService implements CategoryServiceInterface {
     CategoryRepository repository;
     CategoryMapper mapper;
     ProductRepository productRepository;
+    ProductCategoryRepository productcategoryRepository;
 
-    public CategoryService(CategoryRepository repository, CategoryMapper mapper) {
+    public CategoryService(CategoryRepository repository, CategoryMapper mapper, ProductRepository productRepository, ProductCategoryRepository productcategoryRepository) {
         this.repository = repository;
         this.mapper = mapper;
+        this.productRepository = productRepository;
+        this.productcategoryRepository = productcategoryRepository;
     }
 
     public List<CategoryResponseDTOShort> findAll(String name) {
         return repository.findAllProjectedByNameContainsIgnoreCase(name);
     }
 
-    public CategoryResponseDTOShort findById(long id) {
-        return repository.findOneProjectedById(id).orElseThrow(() -> new EntityNotFoundException());
-    }
-
-    public List<CategoryResponseDTO> findAllFull(String name) {
-        return mapper.ToResponseDTOList(repository.findAllByNameContainsIgnoreCase(name));
-    }
-
-    public CategoryResponseDTO findByIdFull(long id) {
+//    public CategoryResponseDTOShort findById(long id) {
+//        return repository.findOneProjectedById(id).orElseThrow(() -> new EntityNotFoundException());
+//    }
+//    public List<CategoryResponseDTO> findAllFull(String name) {
+//        return mapper.ToResponseDTOList(repository.findAllByNameContainsIgnoreCase(name));
+//    }
+//
+    public CategoryResponseDTO findById(long id) {
         return mapper.ToResponseDTO(repository.findById(id).orElseThrow(() -> new EntityNotFoundException()));
     }
 
     public CategoryResponseDTO save(CategoryDTO categoryDTO) {
         Category c = mapper.toEntity(categoryDTO);
-        c = repository.save(c);
+        repository.save(c);
+        Set<ProductCategory> set = new HashSet<>();
         if (categoryDTO.product_id() != null) {
-            addProduct(c.getId(), categoryDTO.product_id());
+            for (long id : categoryDTO.product_id()) {
+                Product product = productRepository.getReferenceById(id);
+                ProductCategory productCategory = new ProductCategory(product, c);
+                set.add(productCategory);
+                productcategoryRepository.save(productCategory);
+            }
         }
-        return mapper.ToResponseDTO(c);
+        c.setProducts(set);
+        Util.addCategory(c.getId());
+        return mapper.ToResponseDTO(repository.findById(c.getId()).get());
     }
 
     public CategoryResponseDTOShort update(CategoryUpdateDTO categoryDTO) {
+        System.out.println(categoryDTO.toString());
         Category c = repository.getReferenceById(categoryDTO.id());
-        if (categoryDTO.name() != null) {
-            c.setName(categoryDTO.name());
-        }
-        if (categoryDTO.description() != null) {
-            c.setDescription(categoryDTO.description());
-        }
+        c.setName(categoryDTO.name());
+        c.setDescription(categoryDTO.description());
         c = repository.save(c);
         return mapper.ToResponseDTOShort(c);
     }
 
-    public boolean delete(long id) {
-        if (checkExist(id)) {
-            Category c = repository.getReferenceById(id);
-            for(Product p : c.getProducts()){
-                p.removeCategory(c);
-            }
+    public void delete(long id) {
+        if (repository.existsById(id)) {
             repository.deleteById(id);
-            return true;
+            Util.removeCategory(id);
+        } else {
+            throw new EntityNotFoundException("No Category exists");
         }
-        return false;
     }
+//
+//    public CategoryResponseDTO addProduct(long category_id, long[] product_ids) {
+//        if (repository.existsById(category_id)) {
+//            Category category = repository.getReferenceById(category_id);
+//            for (long id : product_ids) {
+//                if (productRepository.existsById(id)) {
+//                    System.out.println(id);
+//                    Product product = productRepository.getReferenceById(id);
+//                    ProductCategory product_category = new ProductCategory(product, category);
+//                    productcategoryRepository.save(product_category);
+//                }
+//            }
+//            return mapper.ToResponseDTO(repository.findById(category_id).get());
+//        } else {
+//            throw new EntityNotFoundException();
+//        }
+//    }
+//
+//    @Transactional(rollbackOn = RuntimeException.class)
+//    public CategoryResponseDTO removeProduct(long category_id, long[] product_ids) {
+//        if (repository.existsById(category_id)) {
+//            for (long id : product_ids) {
+//                if (productRepository.existsById(id)) {
+//                    productcategoryRepository.deleteByProductAndCategory(id, category_id);
+//                }
+//            }
+//            return mapper.ToResponseDTO(repository.findById(category_id).get());
+//        } else {
+//            throw new EntityNotFoundException();
+//        }
+//    }
 
-    public CategoryResponseDTO addProduct(long category_id, long[] product_ids) {
-        Category c = repository.getReferenceById(category_id);
-        for (long id : product_ids) {
-            Product p = productRepository.getReferenceById(id);
-            p.addCategory(c);
-            c.addProduct(p);
+    @EventListener(ApplicationReadyEvent.class)
+    @Transactional
+    public void CacheId() {
+        for (Long l : repository.getAllId()) {
+            Util.addCategory(l);
         }
-        repository.save(c);
-        return mapper.ToResponseDTO(c);
     }
-
-    public CategoryResponseDTO removeProduct(long category_id, long[] product_ids) {
-        Category c = repository.getReferenceById(category_id);
-        for (long id : product_ids) {
-            Product p = productRepository.getReferenceById(id);
-            p.removeCategory(c);
-        }
-        c = repository.save(c);
-        return mapper.ToResponseDTO(c);
-    }
-
-    @Override
-    public boolean checkExist(long id) {
-        return repository.existsById(id);
-    }
-
-    @Autowired
-    public void setProductRepository(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
-
 }

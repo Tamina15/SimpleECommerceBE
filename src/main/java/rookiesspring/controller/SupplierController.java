@@ -20,8 +20,8 @@ import rookiesspring.service.SupplierService;
  * @author HP
  * @author Tamina
  */
-@RestController
-@RequestMapping("/supplier")
+//@RestController
+//@RequestMapping("api/v1/suppliers")
 public class SupplierController {
 
     @Autowired

@@ -11,8 +11,11 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import rookiesspring.dto.ProductDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
+import rookiesspring.dto.response.custom.CategoryResponseDTOShort;
 import rookiesspring.dto.response.custom.ProductResponseDTOShort;
+import rookiesspring.model.Category;
 import rookiesspring.model.Product;
+import rookiesspring.model.composite_model.ProductCategory;
 
 /**
  *
@@ -33,6 +36,7 @@ public class ProductMapper implements BaseMapper<Product, ProductDTO, ProductRes
         if (dto.amount() > 0) {
             product.setAmount(dto.amount());
         }
+        product.setFeature(dto.feature());
         product.setCategory(new HashSet<>());
         product.setImages(new HashSet<>());
         return product;
@@ -40,7 +44,14 @@ public class ProductMapper implements BaseMapper<Product, ProductDTO, ProductRes
 
     @Override
     public ProductResponseDTO ToResponseDTO(Product product) {
-        ProductResponseDTO product_dto = new ProductResponseDTO(product.getId(), product.getName(), product.getPrice(), product.getAmount(), product.getRating(), product.getCategory(), product.getImages());
+//        ProductResponseDTO product_dto = new ProductResponseDTO(product.getId(), product.getName(), product.getPrice(), product.getAmount(), product.getRating(), product.getCategory(), product.getImages());
+        Set<ProductCategory> pc = product.getCategory();
+        Set<CategoryResponseDTOShort> set = new HashSet<>();
+        for (ProductCategory a : pc) {
+            Category c = a.getCategory();
+            set.add(new CategoryResponseDTOShort(c.getId(), c.getName(), c.getDescription()));
+        }
+        ProductResponseDTO product_dto = new ProductResponseDTO(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getAmount(), Double.toString(product.getRating()), product.isFeature(), set, product.getImages(), product.getCreatedDate(), product.getUpdatedDate(), product.isDeleted());
         return product_dto;
     }
 
@@ -55,7 +66,7 @@ public class ProductMapper implements BaseMapper<Product, ProductDTO, ProductRes
     }
 
     public ProductResponseDTOShort ToResponseDTOShort(Product product) {
-        ProductResponseDTOShort product_dto_short = new ProductResponseDTOShort(product.getId(), product.getName(), product.getPrice(), product.getAmount(), product.getRating());
+        ProductResponseDTOShort product_dto_short = new ProductResponseDTOShort(product.getId(), product.getName(), product.getDescription(), product.getPrice(), product.getAmount(), Double.toString(product.getRating()));
         return product_dto_short;
     }
 

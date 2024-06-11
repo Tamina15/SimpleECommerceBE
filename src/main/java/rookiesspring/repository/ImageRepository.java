@@ -5,6 +5,9 @@
 package rookiesspring.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import rookiesspring.model.Image;
 
 /**
@@ -12,5 +15,14 @@ import rookiesspring.model.Image;
  * @author HP
  */
 public interface ImageRepository extends JpaRepository<Image, Long> {
-public boolean existsByName(String name);
+
+    public boolean existsByName(String name);
+
+    @Query(value = "delete from Image i where i.id = :id")
+    @Modifying()
+    public void hardDelete(@Param(value = "id") long id);
+
+    @Query(value = "update Image i set i.deleted = false where i.id = :id")
+    @Modifying()
+    public void restore(@Param(value = "id") long id);
 }

@@ -4,30 +4,32 @@
  */
 package rookiesspring.service;
 
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
+import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import rookiesspring.dto.ImageDTO;
+import org.springframework.transaction.annotation.Transactional;
 import rookiesspring.dto.ProductDTO;
+import rookiesspring.dto.ProductRequestDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
-import rookiesspring.dto.response.custom.ProductResponseDTOShort;
+import rookiesspring.dto.response.custom.ProductPagination;
 import rookiesspring.dto.update.ProductUpdateDTO;
 import rookiesspring.exception.ResourceNotFoundException;
-import rookiesspring.mapper.ImageMapper;
 import rookiesspring.mapper.ProductMapper;
 import rookiesspring.model.Category;
-import rookiesspring.model.Image;
 import rookiesspring.model.Product;
-import rookiesspring.model.Rate;
+import rookiesspring.model.composite_model.ProductCategory;
 import rookiesspring.repository.CategoryRepository;
-import rookiesspring.repository.ImageRepository;
+import rookiesspring.repository.ProductCategoryRepository;
 import rookiesspring.repository.ProductRepository;
-import rookiesspring.repository.RateRepository;
 import rookiesspring.service.interfaces.ProductServiceInterface;
+import static rookiesspring.specification.ProductSpecification.*;
 import rookiesspring.util.Util;
 
 /**
@@ -38,126 +40,114 @@ import rookiesspring.util.Util;
 @Service
 public class ProductService implements ProductServiceInterface {
 
-    ProductRepository repository;
-    ProductMapper mapper;
-    @Autowired
-    CategoryRepository categoryRepository;
-    @Autowired
-    ImageMapper imageMapper;
-    @Autowired
-    ImageRepository imageRepository;
+    private final ProductRepository repository;
+    private final ProductMapper mapper;
+    private final CategoryRepository categoryRepository;
+    private final ProductCategoryRepository productCategoryRepository;
 
-    public ProductService(ProductRepository repository, ProductMapper mapper) {
+    public ProductService(ProductRepository repository, ProductMapper mapper, CategoryRepository categoryRepository, ProductCategoryRepository productCategoryRepository) {
         this.repository = repository;
         this.mapper = mapper;
+        this.categoryRepository = categoryRepository;
+        this.productCategoryRepository = productCategoryRepository;
     }
 
-    /**
-     * Need to change if find all category is empty
-     *
-     * @param name
-     * @param category_id
-     * @param from
-     * @param to
-     * @return
-     */
-    public List<ProductResponseDTO> findAll(String name, long[] category_id, LocalDateTime from, LocalDateTime to) {
-        if (from == null) {
-            from = Util.minDateTime;
+    @Transactional(readOnly = true)
+    public List<ProductResponseDTO> findAll(ProductRequestDTO dto) {
+        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrderBy()), dto.getSortBy()));
+        if (dto.getCategory_id().length == 0) {
+            dto.setCategory_id(Util.category_id);
         }
-        if (to == null) {
-            to = LocalDateTime.now();
+        List<Long> product_id;
+        if (dto.isFeatured()) {
+            product_id = repository.findAllFeaturedProductId(dto.getName(), dto.getFrom(), dto.getTo(), dto.getCategory_id(), page_request);
+        } else {
+            product_id = repository.findAllProductId(dto.getName(), dto.getFrom(), dto.getTo(), dto.getCategory_id(), page_request);
         }
-
-        if (name == null) {
-            name = "";
-        }
-
-        if (category_id == null || category_id.length == 0) {
-            if ("".equals(name)) {
-                return mapper.ToResponseDTOList(repository.findAll(from, to));
-            }
-            category_id = categoryRepository.getAllId();
-        }
-        return mapper.ToResponseDTOList(repository.findAll(name, category_id, from, to));
+        List<Product> products = repository.findAllWithCategoryAndImage(product_id, dto.getCategory_id());
+        return mapper.ToResponseDTOList(products);
     }
 
-    public ProductResponseDTOShort findOneById(long id) {
-        return repository.findProjectedById(id);
+    @Transactional(readOnly = true)
+    public ProductPagination findAll_v2(ProductRequestDTO dto) {
+        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrderBy()), dto.getSortBy()));
+        Page<Product> products = repository.findAll(filterSpecsJoinImages(Util.toLongList(dto.getCategory_id()), dto.getName(), dto.isFeatured(), dto.isDeleted(), dto.getFrom(), dto.getTo()), page_request);
+//        Page<Product> products = repository.findAll(fetchImages(), page_request);
+        List<ProductResponseDTO> products_list = mapper.ToResponseDTOList(products.toList());
+        long total = products.getTotalElements();
+        return new ProductPagination(products_list, total);
     }
 
-    public ProductResponseDTO findOneByIdFull(long id) {
-        Product p = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException());
-        return mapper.ToResponseDTO(p);
+    @Transactional(readOnly = true)
+    public List<ProductResponseDTO> findAllByIdIn(long[] product_id) {
+        List<Long> list = new ArrayList();
+        for (long l : product_id) {
+            list.add(l);
+        }
+        List<Product> products = repository.findAllByProductIdIn(list);
+        return mapper.ToResponseDTOList(products);
     }
 
-// done
+    public long countAll(boolean feature, List<Long> category_id) {
+        if (feature) {
+            return repository.count(withCategoryIn(category_id).and(isFeatured(feature)));
+        }
+        return repository.count(withCategoryIn(category_id));
+    }
+
+    public ProductResponseDTO findOneById(long id) {
+        Product product = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException());
+        return mapper.ToResponseDTO(product);
+    }
+
     public ProductResponseDTO save(ProductDTO product_dto) {
-        Product p = mapper.toEntity(product_dto);
-        if (product_dto.category_id() != null) {
-            for (long id : product_dto.category_id()) {
-                Category c = categoryRepository.getReferenceById(id);
-                p.addCategory(c);
-            }
-        }
-        if (product_dto.images() != null) {
-            for (ImageDTO i : product_dto.images()) {
-                Image image = imageMapper.toEntity(i);
-                image.setProduct(p);
-                p.addImage(image);
-            }
-        }
-        p = repository.save(p);
-        return mapper.ToResponseDTO(p);
+        Product product = mapper.toEntity(product_dto);
+        product = repository.save(product);
+        return mapper.ToResponseDTO(product);
     }
 
-//done
-    public void addCategories(long product_id, long[] category_id) {
-        Product p = repository.getReferenceById(product_id);
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public ProductResponseDTO updateCategories(long product_id, long[] category_id) {
+        Product product = repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException());
+        Set<ProductCategory> set = new HashSet<>();
+        productCategoryRepository.deleteByProductId(product_id);
         for (long id : category_id) {
             if (categoryRepository.existsById(id)) {
-                Category c = categoryRepository.getReferenceById(id);
-                p.addCategory(c);
+                Category category = categoryRepository.getReferenceById(id);
+                ProductCategory productCategory = new ProductCategory(product, category);
+                productCategoryRepository.save(productCategory);
             }
-            repository.save(p);
         }
+        return mapper.ToResponseDTO(product);
     }
 
-    public void addImages(long product_id, ImageDTO[] images) {
-        Product p = repository.getReferenceById(product_id);
-        if (images.length != 0) {
-            for (ImageDTO i : images) {
-                if (!imageRepository.existsByName(i.name())) {
-                    Image image = imageMapper.toEntity(i);
-                    image.setProduct(p);
-                    p.addImage(image);
+    @Deprecated
+    public ProductResponseDTO addCategories(long product_id, long[] category_id) {
+        Product product = repository.getReferenceById(product_id);
+        if (repository.existsById(product_id)) {
+            for (long id : category_id) {
+                if (categoryRepository.existsById(id) && !productCategoryRepository.existsByProductIdAndCategoryId(product_id, id)) {
+                    Category category = categoryRepository.getReferenceById(id);
+                    ProductCategory productCategory = new ProductCategory(product, category);
+                    productCategoryRepository.save(productCategory);
                 }
             }
-            repository.save(p);
+        } else {
+            throw new EntityNotFoundException();
         }
+        return mapper.ToResponseDTO(product);
     }
 
-    public void removeCategories(long product_id, long[] category_id) {
-        Product p = repository.getReferenceById(product_id);
+    @Deprecated()
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public ProductResponseDTO removeCategories(long product_id, long[] category_id) {
         if (category_id.length != 0) {
             for (long id : category_id) {
-                Category c = categoryRepository.getReferenceById(id);
-                p.removeCategory(c);
+                productCategoryRepository.deleteByProductIdAndCategoryId(product_id, id);
             }
-            repository.save(p);
         }
-    }
-
-    public void removeImages(long product_id, long[] images_id) {
-        Product p = repository.getReferenceById(product_id);
-        if (images_id.length != 0) {
-            for (long id : images_id) {
-                Image i = imageRepository.getReferenceById(id);
-                System.out.println(i.getId());
-                p.removeImage(i);
-            }
-            repository.save(p);
-        }
+        productCategoryRepository.flush();
+        return mapper.ToResponseDTO(repository.findById(product_id).orElseThrow(() -> new EntityNotFoundException()));
     }
 
     public ProductResponseDTO update(ProductUpdateDTO product_dto) {
@@ -166,41 +156,30 @@ public class ProductService implements ProductServiceInterface {
         p.setDescription(product_dto.description());
         p.setPrice(product_dto.price());
         p.setAmount(product_dto.amount());
+        p.setFeature(product_dto.feature());
         repository.save(p);
-        p = repository.findById(p.getId()).orElseThrow(() -> new ResourceNotFoundException());
         return mapper.ToResponseDTO(p);
     }
 
-    public void delete(long id) {
+    public void delete(long id, boolean forcedDelete) {
         if (repository.existsById(id)) {
-            repository.deleteById(id);
+            if (forcedDelete) {
+
+            } else {
+                repository.deleteById(id);
+            }
+        } else {
+            throw new EntityNotFoundException("No Product With this Id");
         }
     }
 
-    @Override
-    public boolean checkExist(long id) {
-        return repository.existsById(id);
+    @Transactional(rollbackFor = {RuntimeException.class})
+    public void restore(long id) {
+        if (repository.existsById(id)) {
+            repository.restoreProduct(id);
+        } else {
+            throw new EntityNotFoundException("No Product With this Id");
+        }
     }
 
-    @Autowired
-    RateRepository rateRepository;
-
-//    @EventListener(ApplicationReadyEvent.class)
-//    @Transactional
-//    public void doSomethingAfterStartup() {
-//        List<Product> products = repository.findAll();
-//        for (Product p : products) {
-//            List<Rate> rates = rateRepository.findAllByProductId(p.getId());
-//            if (!rates.isEmpty()) {
-//                double score = 0;
-//                for (Rate r : rates) {
-//                    score += r.getScore();
-//                }
-//                score = score / rates.size();
-//                p.setRating(Double.toString(score));
-//                repository.save(p);
-//            }
-//        }
-//        System.out.println("Finding all Rating");
-//    }
 }

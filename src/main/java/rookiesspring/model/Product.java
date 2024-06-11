@@ -6,21 +6,18 @@ package rookiesspring.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
+import rookiesspring.model.composite_model.ProductCategory;
 
 /**
  *
@@ -30,13 +27,16 @@ import org.hibernate.annotations.SQLRestriction;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
+//@ToString
 @SQLDelete(sql = "UPDATE product SET deleted = true WHERE id=?")
-@SQLRestriction(value = "deleted=false")
+//@SQLRestriction(value = "deleted=false")
 public class Product extends AuditEntity<Long> {
 
     private String name;
+
+    @Column(length = 1000)
     private String description;
+
     private double price;
 
     @ColumnDefault(value = "false")
@@ -45,17 +45,22 @@ public class Product extends AuditEntity<Long> {
     @ColumnDefault(value = "0")
     private int amount;
 
-    @ColumnDefault(value = "'none'")
-    private String rating;
+    @ColumnDefault(value = "0")
+    private double rating;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinTable(name = "product_category",
-            joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
+    @ColumnDefault(value = "0")
+    private long total_count_rating;
+//    @ManyToMany()
+//    @JoinTable(name = "product_category",
+//            joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
+//            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
+//    @JsonManagedReference()
+//    private Set<Category> category;
+    @OneToMany(mappedBy = "product")
     @JsonManagedReference()
-    private Set<Category> category;
+    private Set<ProductCategory> category;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonManagedReference()
     private Set<Image> images;
 
@@ -72,7 +77,11 @@ public class Product extends AuditEntity<Long> {
     }
 
     public boolean addCategory(Category c) {
-        return category.add(c);
+        return category.add(new ProductCategory(this, c));
+    }
+
+    public boolean addCategory(ProductCategory pc) {
+        return category.add(pc);
     }
 
     public boolean addImage(Image i) {
@@ -80,7 +89,7 @@ public class Product extends AuditEntity<Long> {
     }
 
     public boolean removeCategory(Category c) {
-        return category.remove(c);
+        return category.remove(new ProductCategory(this, c));
     }
 
     public boolean removeImage(Image i) {
@@ -111,6 +120,11 @@ public class Product extends AuditEntity<Long> {
 
     public void reduceAmount(int amount) {
         this.amount -= amount;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" + "name=" + name + ", description=" + description + ", price=" + price + ", feature=" + feature + ", amount=" + amount + ", rating=" + rating + ", total_count_rating=" + total_count_rating + '}';
     }
 
 }

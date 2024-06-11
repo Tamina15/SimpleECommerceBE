@@ -4,10 +4,12 @@
  */
 package rookiesspring.dto.response.custom;
 
+import java.util.Set;
+
 /**
  *
  * @author HP
  */
-public record UserResponseDTOShort(long id, String username, String email) {
+public record UserResponseDTOShort(long id, String username, String email, boolean blocked, boolean deleted, Set<String> roles) {
 
 }

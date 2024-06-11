@@ -12,6 +12,6 @@ import rookiesspring.dto.response.custom.ProductResponseDTOShort;
  * @author HP
  * @author Tamina
  */
-public record CategoryResponseDTO(long id, String name, String description, List<ProductResponseDTOShort> products) {
+public record CategoryResponseDTO(long id, String name, String description, List<ProductResponseDTOShort> products, boolean deleted) {
 
 }

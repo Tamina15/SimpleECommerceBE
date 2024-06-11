@@ -34,7 +34,7 @@ import rookiesspring.model.composite_model.Order_Detail;
 @Setter
 @ToString
 @SQLDelete(sql = "UPDATE \"order\" SET deleted = true WHERE id=?")
-@SQLRestriction(value = "deleted=false")
+//@SQLRestriction(value = "deleted=false")
 public class Order extends AuditEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)  // field name inside db
@@ -44,7 +44,7 @@ public class Order extends AuditEntity<Long> {
 
     private String totalPrice;
 
-    @OneToMany(mappedBy = "order", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<Order_Detail> details;
 
     @Column(nullable = false)
