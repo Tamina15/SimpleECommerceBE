@@ -9,19 +9,14 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 import rookiesspring.model.composite_model.ProductCategory;
 
 /**
@@ -52,7 +47,7 @@ public class Product extends AuditEntity<Long> {
 
     @ColumnDefault(value = "0")
     private double rating;
-    
+
     @ColumnDefault(value = "0")
     private long total_count_rating;
 //    @ManyToMany()

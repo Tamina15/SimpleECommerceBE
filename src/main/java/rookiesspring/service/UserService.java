@@ -6,8 +6,10 @@ package rookiesspring.service;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +29,7 @@ import rookiesspring.model.Role;
 import rookiesspring.model.User;
 import rookiesspring.repository.UserRepository;
 import rookiesspring.service.interfaces.UserServiceInterface;
+import rookiesspring.specification.UserSpecification;
 
 /**
  *
@@ -54,6 +57,15 @@ public class UserService implements UserServiceInterface, UserDetailsService {
         List<UserResponseDTOShort> users = repository.findAllProjectedBy(page_request);
         long count = repository.count();
         return new UserPaginationShort(users, count);
+    }
+
+    @Transactional(readOnly = true)
+    public UserPaginationShort findAllUser_v2(UserRequestDTO dto) {
+        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrderBy()), dto.getSortBy()));
+        Page<User> users = repository.findAll(UserSpecification.filterSpecs(dto.getUsername(), dto.getEmail(), dto.isBlocked(), dto.getFrom(), dto.getTo()), page_request);
+        List<UserResponseDTOShort> list = mapper.ToResponseDTOShortList(users.toList());
+        long count = users.getTotalElements();
+        return new UserPaginationShort(list, count);
     }
 
     public UserResponseDTO getUserInfo(Long userId) {
@@ -97,7 +109,7 @@ public class UserService implements UserServiceInterface, UserDetailsService {
     @Transactional(rollbackFor = {RuntimeException.class})
     public UserResponseDTOShort blockOrUnblockUser(long user_id, boolean block) {
         User user = repository.findById(user_id).orElseThrow(() -> new EntityNotFoundException("No value present"));
-        user.setBlock(block);
+        user.setBlocked(block);
         repository.save(user);
         return mapper.ToResponseDTOShort(user);
     }

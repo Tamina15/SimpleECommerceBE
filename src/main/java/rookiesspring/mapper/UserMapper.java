@@ -64,8 +64,17 @@ public class UserMapper implements BaseMapper<User, UserDTO, UserResponseDTO> {
     }
 
     public UserResponseDTOShort ToResponseDTOShort(User e) {
-        UserResponseDTOShort u = new UserResponseDTOShort(e.getId(), e.getUserName(), e.getEmail(), e.isBlock(), e.isDeleted(), e.getRoles());
+        UserResponseDTOShort u = new UserResponseDTOShort(e.getId(), e.getUserName(), e.getEmail(), e.isBlocked(), e.isDeleted(), e.getRoles());
         return u;
+    }
+
+    public List<UserResponseDTOShort> ToResponseDTOShortList(List<User> users) {
+        List<UserResponseDTOShort> list = new ArrayList<>();
+        for (User e : users) {
+            UserResponseDTOShort u = new UserResponseDTOShort(e.getId(), e.getUserName(), e.getEmail(), e.isBlocked(), e.isDeleted(), e.getRoles());
+            list.add(u);
+        }
+        return list;
     }
 
     public void toUpdateUserFromDTO(UserUpdateDTO dto, User entity) {
@@ -114,67 +123,5 @@ public class UserMapper implements BaseMapper<User, UserDTO, UserResponseDTO> {
         }
         detail.setAddress(address);
         entity.setUser_detail(detail);
-    }
-
-// MapStruct
-    public void updateUserFromDto(UserUpdateDTO dto, User entity) {
-        if (dto == null) {
-            return;
-        }
-
-        entity.setId(dto.id());
-        if (dto.email() != null) {
-            entity.setEmail(dto.email());
-        }
-        if (dto.username() != null) {
-            entity.setUsername(dto.username());
-        }
-    }
-
-    public void updateUserDetailFromDto(UserUpdateDTO dto, UserDetail entity) {
-        if (dto == null) {
-            return;
-        }
-
-//        entity.setId(dto.id());
-        if (dto.firstname() != null) {
-            entity.setFirstname(dto.firstname());
-        }
-        if (dto.lastname() != null) {
-            entity.setLastname(dto.lastname());
-        }
-        entity.setGender(dto.gender());
-        entity.setAge(dto.age());
-        if (dto.phone() != null) {
-            entity.setPhone(dto.phone());
-        }
-    }
-
-    public void updateUserAddressFromDto(UserUpdateDTO dto, Address entity) {
-        if (dto == null) {
-            return;
-        }
-
-        if (dto.address_number() != null) {
-            entity.setAddress_number(dto.address_number());
-        }
-        if (dto.street() != null) {
-            entity.setStreet(dto.street());
-        }
-        if (dto.ward() != null) {
-            entity.setWard(dto.ward());
-        }
-        if (dto.district() != null) {
-            entity.setDistrict(dto.district());
-        }
-        if (dto.city() != null) {
-            entity.setCity(dto.city());
-        }
-        if (dto.province() != null) {
-            entity.setProvince(dto.province());
-        }
-        if (dto.country() != null) {
-            entity.setCountry(dto.country());
-        }
     }
 }

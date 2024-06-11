@@ -21,7 +21,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -46,7 +45,8 @@ public class User extends AuditEntity<Long> implements UserDetails {
     
     private String password;
     private String refreshToken;
-    private boolean isBlock = false;
+    
+    private boolean blocked = false;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonManagedReference()
@@ -71,7 +71,7 @@ public class User extends AuditEntity<Long> implements UserDetails {
 
     @Override
     public String toString() {
-        return "User{" + "id=" + getId() + ", email=" + email + ", password=" + password + ", refreshToken=" + refreshToken + ", isBlock=" + isBlock + ", orders=" + orders.size() + ", user_detail=" + user_detail + '}';
+        return "User{" + "id=" + getId() + ", email=" + email + ", password=" + password + ", refreshToken=" + refreshToken + ", isBlock=" + blocked + ", orders=" + orders.size() + ", user_detail=" + user_detail + '}';
     }
 
     // TODO

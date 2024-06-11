@@ -18,20 +18,27 @@ import rookiesspring.util.Util;
 public class UserRequestDTO {
 
     private String username = "";
+    private String email = "";
+    private boolean blocked = false; 
 
     private LocalDateTime from = Util.minDateTime;
     private LocalDateTime to = LocalDateTime.now();
+    
     private int limit = 12;
     @PositiveOrZero()
     private int page = 0;
 
     private String sortBy = "id";
-
     private String orderBy = "ASC";
 
     public void setUsername(String username) {
         if (username != null) {
             this.username = username;
+        }
+    }
+    public void setEmail(String email) {
+        if (email != null) {
+            this.email = email;
         }
     }
 

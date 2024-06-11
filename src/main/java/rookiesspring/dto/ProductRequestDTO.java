@@ -19,19 +19,24 @@ public class ProductRequestDTO {
 
     private String name = "";
     private long[] category_id = new long[0];
+    
+    private boolean featured = false;
+
+    private boolean deleted = false;
 
     private LocalDateTime from = Util.minDateTime;
     private LocalDateTime to = LocalDateTime.now();
+
     private int limit = 12;
     @PositiveOrZero()
     private int page = 0;
-    private boolean featured = false;
+
     private String sortBy = "rating";
-    private String order = "ASC";
+    private String orderBy = "ASC";
 
     public void setOrder(String order) {
         if (order.equals("DESC")) {
-            this.order = order;
+            this.orderBy = order;
         }
     }
 

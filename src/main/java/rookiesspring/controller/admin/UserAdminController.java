@@ -46,6 +46,11 @@ public class UserAdminController {
     public ResponseEntity getAllUsers(UserRequestDTO dto) {
         return ResponseEntity.ok(service.findAllUser(dto));
     }
+
+    @GetMapping("/v2")
+    public ResponseEntity getAllUsers_v2(UserRequestDTO dto) {
+        return ResponseEntity.ok(service.findAllUser_v2(dto));
+    }
     
     @GetMapping("/info")
     public ResponseEntity getUserInfomation(Authentication auth) {

@@ -61,10 +61,12 @@ public class AuthenticationService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(input.email(), input.password()));
 
         User authenticatedUser = userRepository.findByEmail(input.email()).orElseThrow();
-        if(authenticatedUser.isBlock() || authenticatedUser.isDeleted()){
+        
+        if(authenticatedUser.isBlocked() || authenticatedUser.isDeleted()){
             System.out.println("User Deleted or Blocked");
-            throw new EntityNotFoundException();
+            throw new EntityNotFoundException("User Deleted or Blocked");
         }
+        
         String jwtToken = jwtService.generateToken(authenticatedUser);
 
         LoginResponseDTO loginResponse = new LoginResponseDTO(jwtToken, jwtService.getExpirationTime());

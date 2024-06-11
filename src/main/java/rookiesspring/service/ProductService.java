@@ -5,10 +5,12 @@
 package rookiesspring.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import rookiesspring.dto.ProductDTO;
 import rookiesspring.dto.ProductRequestDTO;
 import rookiesspring.dto.response.ProductResponseDTO;
-import rookiesspring.dto.response.custom.ProductResponseDTOShort;
+import rookiesspring.dto.response.custom.ProductPagination;
 import rookiesspring.dto.update.ProductUpdateDTO;
 import rookiesspring.exception.ResourceNotFoundException;
 import rookiesspring.mapper.ProductMapper;
@@ -27,7 +29,7 @@ import rookiesspring.repository.CategoryRepository;
 import rookiesspring.repository.ProductCategoryRepository;
 import rookiesspring.repository.ProductRepository;
 import rookiesspring.service.interfaces.ProductServiceInterface;
-import rookiesspring.specification.ProductSpecification;
+import static rookiesspring.specification.ProductSpecification.*;
 import rookiesspring.util.Util;
 
 /**
@@ -52,7 +54,7 @@ public class ProductService implements ProductServiceInterface {
 
     @Transactional(readOnly = true)
     public List<ProductResponseDTO> findAll(ProductRequestDTO dto) {
-        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrder()), dto.getSortBy()));
+        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrderBy()), dto.getSortBy()));
         if (dto.getCategory_id().length == 0) {
             dto.setCategory_id(Util.category_id);
         }
@@ -67,6 +69,16 @@ public class ProductService implements ProductServiceInterface {
     }
 
     @Transactional(readOnly = true)
+    public ProductPagination findAll_v2(ProductRequestDTO dto) {
+        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrderBy()), dto.getSortBy()));
+        Page<Product> products = repository.findAll(filterSpecsJoinImages(Util.toLongList(dto.getCategory_id()), dto.getName(), dto.isFeatured(), dto.isDeleted(), dto.getFrom(), dto.getTo()), page_request);
+//        Page<Product> products = repository.findAll(fetchImages(), page_request);
+        List<ProductResponseDTO> products_list = mapper.ToResponseDTOList(products.toList());
+        long total = products.getTotalElements();
+        return new ProductPagination(products_list, total);
+    }
+
+    @Transactional(readOnly = true)
     public List<ProductResponseDTO> findAllByIdIn(long[] product_id) {
         List<Long> list = new ArrayList();
         for (long l : product_id) {
@@ -78,9 +90,9 @@ public class ProductService implements ProductServiceInterface {
 
     public long countAll(boolean feature, List<Long> category_id) {
         if (feature) {
-            return repository.count(ProductSpecification.countAllWithCategoryIn(category_id).and(ProductSpecification.countAllFeatured(feature)));
+            return repository.count(withCategoryIn(category_id).and(isFeatured(feature)));
         }
-        return repository.count(ProductSpecification.countAllWithCategoryIn(category_id));
+        return repository.count(withCategoryIn(category_id));
     }
 
     public ProductResponseDTO findOneById(long id) {

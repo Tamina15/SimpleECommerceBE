@@ -5,12 +5,10 @@
 package rookiesspring.controller;
 
 import jakarta.validation.Valid;
-import java.util.Arrays;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,6 +38,10 @@ public class ProductController {
         List<ProductResponseDTO> list_products = service.findAll(dto);
         long count = service.countAll(dto.isFeatured(), Util.toLongList(dto.getCategory_id()));
         return ResponseEntity.ok().body(new ProductPagination(list_products, count));
+    }
+    @GetMapping("/v2")
+    public ResponseEntity getAllProductsv2(@Valid ProductRequestDTO dto) {
+        return ResponseEntity.ok().body(service.findAll_v2(dto));
     }
 
     @GetMapping("/{id}")
