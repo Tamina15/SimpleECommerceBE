@@ -26,7 +26,7 @@ public class RateMapper implements BaseMapper<Rate, RateDTO, RateResponseDTO> {
 
     @Override
     public RateResponseDTO ToResponseDTO(Rate e) {
-        RateResponseDTO rate_response_dto = new RateResponseDTO(e.getUser().getUserName(), e.getScore(), e.getComment());
+        RateResponseDTO rate_response_dto = new RateResponseDTO(e.getUser().getEmail(), e.getRate(), e.getComment());
         return rate_response_dto;
     }
 

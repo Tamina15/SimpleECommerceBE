@@ -17,8 +17,10 @@ import rookiesspring.model.Rate;
  */
 
 public interface RateRepository extends JpaRepository<Rate, Long>, JpaSpecificationExecutor<Rate>{
+    
+    
     public List<Rate> findAllByProductId(Long id);
 
-    public boolean existsByProductIdAndUserId(Long id, Long id0);
+    public boolean existsByProductIdAndUserEmail(Long id, String email);
     
 }

@@ -33,6 +33,8 @@ public class CategoryMapper implements BaseMapper<Category, CategoryDTO, Categor
         Category c = new Category();
         c.setName(dto.name());
         c.setDescription(dto.description());
+        Set<ProductCategory> set = new HashSet<>();
+        c.setProducts(set);
         return c;
     }
 

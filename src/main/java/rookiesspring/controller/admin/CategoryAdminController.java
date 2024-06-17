@@ -47,16 +47,6 @@ public class CategoryAdminController {
         return ResponseEntity.ok(service.findById(id));
     }
 
-//    @GetMapping("/products")
-//    public ResponseEntity getAllCategoriesWithProducts(@RequestParam(required = false) String name) {
-//        return ResponseEntity.ok(service.findAllFull(name));
-//    }
-//
-//    @GetMapping("/products/{id}")
-//    public ResponseEntity getOneCategoryWithProducts(@PathVariable(name = "id") long id) {
-//        return ResponseEntity.ok(service.findByIdFull(id));
-//    }
-
     @PostMapping("")
     public ResponseEntity addCategory(@Valid @RequestBody() CategoryDTO category) {
         System.out.println(category.toString());
@@ -68,23 +58,9 @@ public class CategoryAdminController {
         return ResponseEntity.ok(service.update(category));
     }
 
-//    @PostMapping("/products")
-//    public ResponseEntity addProduct(@RequestBody() CD_ID id) {
-//        return ResponseEntity.ok(service.addProduct(id.category_id(), id.product_ids()));
-//    }
-//
-//    @DeleteMapping("/products")
-//    public ResponseEntity removeProduct(@RequestBody() CD_ID id) {
-//        return ResponseEntity.ok(service.removeProduct(id.category_id(), id.product_ids()));
-//    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity deleteCategory(@PathVariable("id") long id) {
         service.delete(id);
         return ResponseEntity.ok().body(Util.message("Delete Succesfully"));
     }
 }
-//
-//record CD_ID(long category_id, long[] product_ids) {
-//
-//}

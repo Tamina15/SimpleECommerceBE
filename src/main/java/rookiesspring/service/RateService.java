@@ -36,10 +36,19 @@ public class RateService {
         this.productRepository = productRepository;
     }
 
+    public List<RateResponseDTO> getAllRating(Long product_id) {
+        if (repository.existsById(product_id)) {
+            List<Rate> rates = repository.findAllByProductId(product_id);
+            return mapper.ToResponseDTOList(rates);
+        } else {
+            throw new EntityNotFoundException();
+        }
+    }
+
     @Transactional(rollbackFor = {RuntimeException.class})
     public double rateProduct(RateDTO rate_dto, User user) {
         Product product = productRepository.findById(rate_dto.product_id()).orElseThrow(() -> new EntityNotFoundException());
-        if (repository.existsByProductIdAndUserId(product.getId(), user.getId())) {
+        if (repository.existsByProductIdAndUserEmail(product.getId(), user.getEmail())) {
             throw new EntityExistsException("You have already rate this product");
         }
         double current_rating = product.getRating();
@@ -52,15 +61,6 @@ public class RateService {
         product.setTotal_count_rating(total + 1);
         productRepository.save(product);
         return rating;
-    }
-
-    public List<RateResponseDTO> getAllRating(Long product_id) {
-        if (repository.existsById(product_id)) {
-            List<Rate> rates = repository.findAllByProductId(product_id);
-            return mapper.ToResponseDTOList(rates);
-        } else {
-            throw new EntityNotFoundException();
-        }
     }
 
     //    @EventListener(ApplicationReadyEvent.class)

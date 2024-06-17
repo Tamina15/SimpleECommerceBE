@@ -20,8 +20,6 @@ import rookiesspring.model.Product;
  */
 public class ProductSpecification {
 
-    private ProductRequestDTO filter;
-
     public static Specification<Product> withCategoryIn(List<Long> category_id) {
         return (root, query, builder) -> {
             if (category_id.isEmpty()) {
@@ -29,18 +27,23 @@ public class ProductSpecification {
             }
             final Path<Category> group = root.<Category>get("category").get("category").get("id");
             return group.in(category_id);
-//            return builder.in(root.get("category").get("category").get("id")).in(category_id);
         };
     }
 
-    public static Specification<Product> isFeatured(boolean feature) {
+    public static Specification<Product> isFeatured(Boolean feature) {
         return (root, query, builder) -> {
+            if (feature == null) {
+                return builder.conjunction();
+            }
             return builder.equal(root.get("feature"), feature);
         };
     }
 
-    public static Specification<Product> isDeleted(boolean deleted) {
+    public static Specification<Product> isDeleted(Boolean deleted) {
         return (root, query, builder) -> {
+            if (deleted == null) {
+                return builder.conjunction();
+            }
             return builder.equal(root.get("deleted"), deleted);
         };
     }
@@ -66,11 +69,7 @@ public class ProductSpecification {
         };
     }
 
-    public static Specification<Product> filterSpecs(List<Long> category_id, String name, boolean featured, boolean deleted, LocalDateTime from, LocalDateTime to) {
-        return withCategoryIn(category_id).and(nameLike(name)).and(isFeatured(featured)).and(isDeleted(deleted)).and(createdDateInBetween(from, to));
-    }
-
-    public static Specification<Product> filterSpecsJoinImages(List<Long> category_id, String name, boolean featured, boolean deleted, LocalDateTime from, LocalDateTime to) {
+    public static Specification<Product> filterSpecsJoinImages(List<Long> category_id, String name, Boolean featured, Boolean deleted, LocalDateTime from, LocalDateTime to) {
         return Specification.where(fetchImages()).and(withCategoryIn(category_id)).and(nameLike(name)).and(isFeatured(featured)).and(isDeleted(deleted)).and(createdDateInBetween(from, to));
     }
 

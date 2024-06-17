@@ -28,7 +28,7 @@ import lombok.Setter;
 public class Rate extends AuditEntity<Long> {
 
     @ManyToOne(cascade = CascadeType.MERGE)  // field name inside db
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
     @JsonBackReference
     private User user;
 
@@ -37,7 +37,8 @@ public class Rate extends AuditEntity<Long> {
     @JsonBackReference
     private Product product;
 
-    private int score;
+    private int rate;
+    
     private String comment;
 
     @Override

@@ -38,27 +38,16 @@ public class CategoryService implements CategoryServiceInterface {
 
     CategoryRepository repository;
     CategoryMapper mapper;
-    ProductRepository productRepository;
-    ProductCategoryRepository productcategoryRepository;
-
-    public CategoryService(CategoryRepository repository, CategoryMapper mapper, ProductRepository productRepository, ProductCategoryRepository productcategoryRepository) {
+    
+    public CategoryService(CategoryRepository repository, CategoryMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
-        this.productRepository = productRepository;
-        this.productcategoryRepository = productcategoryRepository;
     }
 
     public List<CategoryResponseDTOShort> findAll(String name) {
         return repository.findAllProjectedByNameContainsIgnoreCase(name);
     }
 
-//    public CategoryResponseDTOShort findById(long id) {
-//        return repository.findOneProjectedById(id).orElseThrow(() -> new EntityNotFoundException());
-//    }
-//    public List<CategoryResponseDTO> findAllFull(String name) {
-//        return mapper.ToResponseDTOList(repository.findAllByNameContainsIgnoreCase(name));
-//    }
-//
     public CategoryResponseDTO findById(long id) {
         return mapper.ToResponseDTO(repository.findById(id).orElseThrow(() -> new EntityNotFoundException()));
     }
@@ -66,17 +55,6 @@ public class CategoryService implements CategoryServiceInterface {
     public CategoryResponseDTO save(CategoryDTO categoryDTO) {
         Category c = mapper.toEntity(categoryDTO);
         repository.save(c);
-        Set<ProductCategory> set = new HashSet<>();
-        if (categoryDTO.product_id() != null) {
-            for (long id : categoryDTO.product_id()) {
-                Product product = productRepository.getReferenceById(id);
-                ProductCategory productCategory = new ProductCategory(product, c);
-                set.add(productCategory);
-                productcategoryRepository.save(productCategory);
-            }
-        }
-        c.setProducts(set);
-        Util.addCategory(c.getId());
         return mapper.ToResponseDTO(repository.findById(c.getId()).get());
     }
 
@@ -92,48 +70,8 @@ public class CategoryService implements CategoryServiceInterface {
     public void delete(long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
-            Util.removeCategory(id);
         } else {
             throw new EntityNotFoundException("No Category exists");
-        }
-    }
-//
-//    public CategoryResponseDTO addProduct(long category_id, long[] product_ids) {
-//        if (repository.existsById(category_id)) {
-//            Category category = repository.getReferenceById(category_id);
-//            for (long id : product_ids) {
-//                if (productRepository.existsById(id)) {
-//                    System.out.println(id);
-//                    Product product = productRepository.getReferenceById(id);
-//                    ProductCategory product_category = new ProductCategory(product, category);
-//                    productcategoryRepository.save(product_category);
-//                }
-//            }
-//            return mapper.ToResponseDTO(repository.findById(category_id).get());
-//        } else {
-//            throw new EntityNotFoundException();
-//        }
-//    }
-//
-//    @Transactional(rollbackOn = RuntimeException.class)
-//    public CategoryResponseDTO removeProduct(long category_id, long[] product_ids) {
-//        if (repository.existsById(category_id)) {
-//            for (long id : product_ids) {
-//                if (productRepository.existsById(id)) {
-//                    productcategoryRepository.deleteByProductAndCategory(id, category_id);
-//                }
-//            }
-//            return mapper.ToResponseDTO(repository.findById(category_id).get());
-//        } else {
-//            throw new EntityNotFoundException();
-//        }
-//    }
-
-    @EventListener(ApplicationReadyEvent.class)
-    @Transactional
-    public void CacheId() {
-        for (Long l : repository.getAllId()) {
-            Util.addCategory(l);
         }
     }
 }

@@ -48,9 +48,7 @@ public class ProductAdminController {
 
     @GetMapping("")
     public ResponseEntity getAllProducts(@Valid ProductRequestDTO dto) {
-        List<ProductResponseDTO> list_products = service.findAll(dto);
-        long count = service.countAll(dto.isFeatured(), Util.toLongList(dto.getCategory_id()));
-        return ResponseEntity.ok().body(new ProductPagination(list_products, count));
+        return ResponseEntity.ok().body(service.findAll(dto));
     }
 
     @GetMapping("/{id}")
@@ -71,16 +69,6 @@ public class ProductAdminController {
     @PutMapping("/categories")
     public ResponseEntity updateCategories(@Valid @RequestBody() ProductUpdateCategoryDTO dto) {
         return ResponseEntity.ok().body(service.updateCategories(dto.getProduct_id(), dto.getCategory_id()));
-    }
-
-    @PostMapping("/categories")
-    public ResponseEntity addCategories(@RequestParam("product_id") long product_id, @RequestParam("category_id") long[] category_id) {
-        return ResponseEntity.ok().body(service.addCategories(product_id, category_id));
-    }
-
-    @DeleteMapping("/categories")
-    public ResponseEntity removeCategories(@RequestParam("product_id") long product_id, @RequestParam("category_id") long[] category_id) {
-        return ResponseEntity.ok().body(service.removeCategories(product_id, category_id));
     }
 
     @PostMapping("/images")

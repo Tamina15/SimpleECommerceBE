@@ -9,6 +9,6 @@ package rookiesspring.dto.response;
  * @author HP
  * @author Tamina
  */
-public record RateResponseDTO(String username, double rating, String comment) {
+public record RateResponseDTO(String email, double rating, String comment) {
 
 }

@@ -20,13 +20,14 @@ public class ProductRequestDTO {
     private String name = "";
     private long[] category_id = new long[0];
     
-    private boolean featured = false;
+    private Boolean featured;
 
-    private boolean deleted = false;
+    private Boolean deleted;
 
     private LocalDateTime from = Util.minDateTime;
     private LocalDateTime to = LocalDateTime.now();
 
+    
     private int limit = 12;
     @PositiveOrZero()
     private int page = 0;

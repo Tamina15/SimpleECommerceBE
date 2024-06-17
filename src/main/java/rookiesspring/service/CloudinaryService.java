@@ -32,24 +32,19 @@ public class CloudinaryService {
             HashMap<Object, Object> options = new HashMap<>();
             options.put("folder", folderName);
             Map uploadedFile = cloudinary.uploader().upload(file.getBytes(), options);
+            uploadedFile.forEach((t, u) -> {
+                System.out.print(t.toString() + " ");
+                System.out.println(u.toString());
+            });
             String publicId = (String) uploadedFile.get("public_id");
             return cloudinary.url().secure(true).generate(publicId);
         } catch (IOException e) {
             return null;
         }
     }
+    
+    public void deleteFile(String name){
+//        cloudinary.uploader().destroy(name, options);
+    }
 
-//    public Map uploadFile(MultipartFile file, String folderName) throws IOException {
-//        return cloudinary.uploader().upload(file.getBytes(), 
-//            ObjectUtils.asMap(
-//                "folder", folderName
-//            ));
-//    }
-//    public Map uploadVideo(MultipartFile file, String folderName) throws IOException {
-//        return cloudinary.uploader().upload(file.getBytes(), 
-//            ObjectUtils.asMap(
-//                "resource_type", "video",
-//                "folder", folderName
-//            ));
-//    }
 }

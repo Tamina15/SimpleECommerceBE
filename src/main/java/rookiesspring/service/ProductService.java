@@ -53,26 +53,9 @@ public class ProductService implements ProductServiceInterface {
     }
 
     @Transactional(readOnly = true)
-    public List<ProductResponseDTO> findAll(ProductRequestDTO dto) {
+    public ProductPagination findAll(ProductRequestDTO dto) {
         PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrderBy()), dto.getSortBy()));
-        if (dto.getCategory_id().length == 0) {
-            dto.setCategory_id(Util.category_id);
-        }
-        List<Long> product_id;
-        if (dto.isFeatured()) {
-            product_id = repository.findAllFeaturedProductId(dto.getName(), dto.getFrom(), dto.getTo(), dto.getCategory_id(), page_request);
-        } else {
-            product_id = repository.findAllProductId(dto.getName(), dto.getFrom(), dto.getTo(), dto.getCategory_id(), page_request);
-        }
-        List<Product> products = repository.findAllWithCategoryAndImage(product_id, dto.getCategory_id());
-        return mapper.ToResponseDTOList(products);
-    }
-
-    @Transactional(readOnly = true)
-    public ProductPagination findAll_v2(ProductRequestDTO dto) {
-        PageRequest page_request = PageRequest.of(dto.getPage(), dto.getLimit(), Sort.by(Sort.Direction.fromString(dto.getOrderBy()), dto.getSortBy()));
-        Page<Product> products = repository.findAll(filterSpecsJoinImages(Util.toLongList(dto.getCategory_id()), dto.getName(), dto.isFeatured(), dto.isDeleted(), dto.getFrom(), dto.getTo()), page_request);
-//        Page<Product> products = repository.findAll(fetchImages(), page_request);
+        Page<Product> products = repository.findAll(filterSpecsJoinImages(Util.toLongList(dto.getCategory_id()), dto.getName(), dto.getFeatured(), dto.getDeleted(), dto.getFrom(), dto.getTo()), page_request);
         List<ProductResponseDTO> products_list = mapper.ToResponseDTOList(products.toList());
         long total = products.getTotalElements();
         return new ProductPagination(products_list, total);
@@ -86,13 +69,6 @@ public class ProductService implements ProductServiceInterface {
         }
         List<Product> products = repository.findAllByProductIdIn(list);
         return mapper.ToResponseDTOList(products);
-    }
-
-    public long countAll(boolean feature, List<Long> category_id) {
-        if (feature) {
-            return repository.count(withCategoryIn(category_id).and(isFeatured(feature)));
-        }
-        return repository.count(withCategoryIn(category_id));
     }
 
     public ProductResponseDTO findOneById(long id) {

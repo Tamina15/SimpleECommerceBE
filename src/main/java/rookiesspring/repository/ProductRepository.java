@@ -29,8 +29,14 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Query(value = "select p.id from Product p join p.category c where (LOWER(p.name) LIKE concat('%', LOWER(:name), '%')) and (p.createdDate between :from and :to) and c.category.id in :category_id")
     public List<Long> findAllProductId(@Param(value = "name") String name, @Param(value = "from") LocalDateTime from, @Param(value = "to") LocalDateTime to, @Param(value = "category_id") long[] category_id, Pageable pageable);
 
+    @Query(value = "select p from Product p left join fetch p.category c where (LOWER(p.name) LIKE concat('%', LOWER(:name), '%')) and (p.createdDate between :from and :to)")
+    public List<Product> findAllProduct(@Param(value = "name") String name, @Param(value = "from") LocalDateTime from, @Param(value = "to") LocalDateTime to, Pageable pageable);
+
     @Query(value = "select p from Product p left join fetch p.category c left join fetch p.images where p.id in :product_id and c.category.id in :category_id")
     public List<Product> findAllWithCategoryAndImage(@Param(value = "product_id") List<Long> product_id, @Param(value = "category_id") long[] category_id);
+
+    @Query(value = "select p from Product p left join fetch p.category c left join fetch p.images where p.id in :product_id")
+    public List<Product> findAllWithImage(@Param(value = "product_id") List<Long> product_id);
 
     public List<Product> getReferenceByIdIn(long[] product_id);
 

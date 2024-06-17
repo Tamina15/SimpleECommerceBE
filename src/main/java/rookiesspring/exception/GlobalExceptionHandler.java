@@ -65,17 +65,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity handleValidationExceptions(MethodArgumentNotValidException e) {
-        return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getBindingResult().getAllErrors().get(0).getDefaultMessage()) : "Invalid Parameter");
+        return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? Util.UpperCaseAllFirstLetter(e.getBindingResult().getAllErrors().get(0).getDefaultMessage()) : "Invalid Parameter");
     }
     
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity handleBadRequestExceptions(BadRequestException e) {
-        return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getStackTrace()[0].toString()) : "Bad Request");
+        return buildException(HttpStatus.BAD_REQUEST.value(), e.getMessage() != null ? Util.UpperCaseAllFirstLetter(e.getStackTrace()[0].toString()) : "Bad Request");
     }
     
     @ExceptionHandler({MalformedJwtException.class, ExpiredJwtException.class})
     public ResponseEntity handleMalformedJwtExceptions(JwtException e) {
-        return buildException(HttpStatus.FORBIDDEN.value(), e.getMessage() != null ? Util.UpperCaseFirstLetter(e.getMessage()) : "Malformed JWT Token");
+        return buildException(HttpStatus.FORBIDDEN.value(), e.getMessage() != null ? Util.UpperCaseAllFirstLetter(e.getMessage()) : "Malformed JWT Token");
     }
 
 }
