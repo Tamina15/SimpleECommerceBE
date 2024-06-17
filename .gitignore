@@ -35,3 +35,4 @@ build/
 **/application.properties
 /src - Copy
 /nbproject/
+*.properties
